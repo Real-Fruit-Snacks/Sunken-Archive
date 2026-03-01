@@ -521,6 +521,20 @@ code {
   background: var(--lightgray);
 }
 
+.combined-code-section {
+  margin-top: 2rem;
+
+  > hr {
+    margin-bottom: 1rem;
+  }
+
+  > pre.combined-code-block > code {
+    display: block;
+    white-space: pre;
+    counter-reset: none;
+  }
+}
+
 tbody,
 li,
 p {

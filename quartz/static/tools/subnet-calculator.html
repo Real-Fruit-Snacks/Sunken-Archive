@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subnet Calculator — Sunken Archive</title>
+  <style>
+    :root {
+      --base: #1e1e2e;
+      --mantle: #181825;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --overlay0: #6c7086;
+      --text: #cdd6f4;
+      --subtext0: #a6adc8;
+      --peach: #fab387;
+      --green: #a6e3a1;
+      --blue: #89b4fa;
+      --red: #f38ba8;
+      --yellow: #f9e2af;
+      --mauve: #cba6f7;
+      --rosewater: #f5e0dc;
+      --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "IBM Plex Mono", "Fira Code", monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--base);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 0;
+    }
+    .container { max-width: 720px; width: 100%; }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .input-row input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+      font-family: var(--font-mono);
+      background: var(--surface0);
+      border: 2px solid var(--surface1);
+      border-radius: 8px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-row input:focus { border-color: var(--peach); }
+    .input-row input::placeholder { color: var(--overlay0); }
+
+    .cidr-select {
+      width: 90px;
+      padding: 0.75rem 0.5rem;
+      font-size: 1.1rem;
+      font-family: var(--font-mono);
+      background: var(--surface0);
+      border: 2px solid var(--surface1);
+      border-radius: 8px;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+    .cidr-select:focus { border-color: var(--peach); }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+    .preset-btn {
+      background: var(--surface0);
+      border: 1px solid var(--surface1);
+      color: var(--subtext0);
+      padding: 0.3rem 0.6rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 0.8rem;
+    }
+    .preset-btn:hover { color: var(--text); border-color: var(--peach); }
+    .preset-btn.active { color: var(--peach); border-color: var(--peach); }
+
+    .results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .result-card {
+      background: var(--mantle);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+    .result-card.full { grid-column: 1 / -1; }
+    .result-card .label {
+      font-size: 0.75rem;
+      color: var(--subtext0);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .result-card .value {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--peach);
+      word-break: break-all;
+    }
+    .result-card .value.green { color: var(--green); }
+    .result-card .value.blue { color: var(--blue); }
+    .result-card .value.yellow { color: var(--yellow); }
+    .result-card .value.mauve { color: var(--mauve); }
+
+    .empty-state {
+      color: var(--overlay0);
+      font-style: italic;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .class-badge {
+      display: inline-block;
+      background: var(--surface0);
+      color: var(--mauve);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+
+    .binary-row {
+      background: var(--mantle);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.75rem;
+    }
+    .binary-row .label {
+      font-size: 0.75rem;
+      color: var(--subtext0);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+    .binary-display {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .net-bits { color: var(--peach); }
+    .host-bits { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/Sunken-Archive/" style="display:inline-block;margin-bottom:1rem;color:var(--peach);text-decoration:none;font-size:0.9rem;">← Sunken Archive</a>
+    <div class="input-row">
+      <input type="text" id="ipInput" placeholder="192.168.1.0" autofocus>
+      <select class="cidr-select" id="cidrSelect"></select>
+    </div>
+
+    <div class="presets">
+      <button class="preset-btn" data-ip="10.0.0.0" data-cidr="8">10.0.0.0/8</button>
+      <button class="preset-btn" data-ip="172.16.0.0" data-cidr="12">172.16.0.0/12</button>
+      <button class="preset-btn" data-ip="192.168.1.0" data-cidr="24">192.168.1.0/24</button>
+      <button class="preset-btn" data-ip="192.168.1.0" data-cidr="25">192.168.1.0/25</button>
+      <button class="preset-btn" data-ip="192.168.1.0" data-cidr="28">192.168.1.0/28</button>
+    </div>
+
+    <div id="results">
+      <div class="empty-state">Enter an IP address above</div>
+    </div>
+  </div>
+
+  <script>
+    const ipInput = document.getElementById("ipInput");
+    const cidrSelect = document.getElementById("cidrSelect");
+    const resultsDiv = document.getElementById("results");
+
+    // Populate CIDR dropdown
+    for (let i = 0; i <= 32; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = "/" + i;
+      if (i === 24) opt.selected = true;
+      cidrSelect.appendChild(opt);
+    }
+
+    // Presets
+    document.querySelectorAll(".preset-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        ipInput.value = btn.dataset.ip;
+        cidrSelect.value = btn.dataset.cidr;
+        calculate();
+      });
+    });
+
+    function parseIP(str) {
+      const parts = str.trim().split(".");
+      if (parts.length !== 4) return null;
+      const nums = parts.map(p => parseInt(p, 10));
+      if (nums.some(n => isNaN(n) || n < 0 || n > 255)) return null;
+      return (nums[0] << 24 | nums[1] << 16 | nums[2] << 8 | nums[3]) >>> 0;
+    }
+
+    function toIP(num) {
+      return [(num >>> 24) & 255, (num >>> 16) & 255, (num >>> 8) & 255, num & 255].join(".");
+    }
+
+    function toBinary(num) {
+      return [(num >>> 24) & 255, (num >>> 16) & 255, (num >>> 8) & 255, num & 255]
+        .map(b => b.toString(2).padStart(8, "0")).join(".");
+    }
+
+    function getClass(ip) {
+      const first = (ip >>> 24) & 255;
+      if (first < 128) return "A";
+      if (first < 192) return "B";
+      if (first < 224) return "C";
+      if (first < 240) return "D (Multicast)";
+      return "E (Reserved)";
+    }
+
+    function isPrivate(ip) {
+      const a = (ip >>> 24) & 255, b = (ip >>> 16) & 255;
+      if (a === 10) return true;
+      if (a === 172 && b >= 16 && b <= 31) return true;
+      if (a === 192 && b === 168) return true;
+      return false;
+    }
+
+    function calculate() {
+      const ip = parseIP(ipInput.value);
+      if (ip === null) {
+        resultsDiv.innerHTML = '<div class="empty-state">Enter a valid IPv4 address</div>';
+        return;
+      }
+
+      const cidr = parseInt(cidrSelect.value, 10);
+      const mask = cidr === 0 ? 0 : (0xFFFFFFFF << (32 - cidr)) >>> 0;
+      const wildcard = (~mask) >>> 0;
+      const network = (ip & mask) >>> 0;
+      const broadcast = (network | wildcard) >>> 0;
+      const firstHost = cidr >= 31 ? network : (network + 1) >>> 0;
+      const lastHost = cidr >= 31 ? broadcast : (broadcast - 1) >>> 0;
+      const totalHosts = cidr >= 31 ? Math.pow(2, 32 - cidr) : Math.pow(2, 32 - cidr) - 2;
+      const ipClass = getClass(ip);
+      const priv = isPrivate(network);
+
+      const binStr = toBinary(ip);
+      const netBin = binStr.replace(/\./g, "").substring(0, cidr);
+      const hostBin = binStr.replace(/\./g, "").substring(cidr);
+
+      // Format binary with dots for readability
+      const fullBin = binStr.replace(/\./g, "");
+      let coloredBin = "";
+      for (let i = 0; i < 32; i++) {
+        if (i > 0 && i % 8 === 0) coloredBin += ".";
+        if (i < cidr) coloredBin += `<span class="net-bits">${fullBin[i]}</span>`;
+        else coloredBin += `<span class="host-bits">${fullBin[i]}</span>`;
+      }
+
+      resultsDiv.innerHTML = `
+        <div class="results">
+          <div class="result-card">
+            <div class="label">Network Address</div>
+            <div class="value">${toIP(network)}/${cidr}</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Broadcast Address</div>
+            <div class="value blue">${toIP(broadcast)}</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Subnet Mask</div>
+            <div class="value green">${toIP(mask)}</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Wildcard Mask</div>
+            <div class="value yellow">${toIP(wildcard)}</div>
+          </div>
+          <div class="result-card">
+            <div class="label">First Usable Host</div>
+            <div class="value">${toIP(firstHost)}</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Last Usable Host</div>
+            <div class="value">${toIP(lastHost)}</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Usable Hosts</div>
+            <div class="value mauve">${totalHosts.toLocaleString()}</div>
+          </div>
+          <div class="result-card">
+            <div class="label">IP Class / Type</div>
+            <div class="value"><span class="class-badge">${ipClass}</span> ${priv ? '<span class="class-badge">Private</span>' : '<span class="class-badge">Public</span>'}</div>
+          </div>
+        </div>
+        <div class="binary-row">
+          <div class="label">Binary (<span class="net-bits">network</span> / <span class="host-bits">host</span>)</div>
+          <div class="binary-display">${coloredBin}</div>
+        </div>
+      `;
+    }
+
+    ipInput.addEventListener("input", calculate);
+    cidrSelect.addEventListener("change", calculate);
+  </script>
+</body>
+</html>

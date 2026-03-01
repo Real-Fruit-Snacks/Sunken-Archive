@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="280" viewBox="0 0 800 280">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#11111b"/>
+      <stop offset="50%" style="stop-color:#1e1e2e"/>
+      <stop offset="100%" style="stop-color:#181825"/>
+    </linearGradient>
+    <linearGradient id="title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fab387"/>
+      <stop offset="40%" style="stop-color:#f5e0dc"/>
+      <stop offset="70%" style="stop-color:#fab387"/>
+      <stop offset="100%" style="stop-color:#f9e2af"/>
+    </linearGradient>
+    <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fab387;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#89b4fa;stop-opacity:0.06"/>
+    </linearGradient>
+    <linearGradient id="wave2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#89b4fa;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#fab387;stop-opacity:0.04"/>
+    </linearGradient>
+    <linearGradient id="wave3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#94e2d5;stop-opacity:0.06"/>
+      <stop offset="100%" style="stop-color:#cba6f7;stop-opacity:0.03"/>
+    </linearGradient>
+    <linearGradient id="accent-line" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fab387;stop-opacity:0"/>
+      <stop offset="20%" style="stop-color:#fab387"/>
+      <stop offset="50%" style="stop-color:#f5e0dc"/>
+      <stop offset="80%" style="stop-color:#fab387"/>
+      <stop offset="100%" style="stop-color:#fab387;stop-opacity:0"/>
+    </linearGradient>
+    <linearGradient id="anchor-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fab387"/>
+      <stop offset="100%" style="stop-color:#f9e2af"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="anchor-glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="280" rx="12" fill="url(#bg)"/>
+
+  <!-- Subtle border -->
+  <rect width="800" height="280" rx="12" fill="none" stroke="#313244" stroke-width="1"/>
+
+  <!-- Decorative wave shapes -->
+  <path d="M0,210 Q200,170 400,195 T800,165 L800,280 L0,280 Z" fill="url(#wave1)"/>
+  <path d="M0,235 Q250,200 500,225 T800,200 L800,280 L0,280 Z" fill="url(#wave2)"/>
+  <path d="M0,255 Q300,230 600,250 T800,235 L800,280 L0,280 Z" fill="url(#wave3)"/>
+
+  <!-- Decorative dots pattern -->
+  <g opacity="0.08">
+    <circle cx="680" cy="50" r="1.5" fill="#fab387"/>
+    <circle cx="700" cy="45" r="1" fill="#89b4fa"/>
+    <circle cx="720" cy="55" r="1.5" fill="#94e2d5"/>
+    <circle cx="695" cy="65" r="1" fill="#cba6f7"/>
+    <circle cx="715" cy="38" r="1" fill="#fab387"/>
+    <circle cx="735" cy="48" r="1.5" fill="#89b4fa"/>
+    <circle cx="660" cy="58" r="1" fill="#94e2d5"/>
+    <circle cx="740" cy="62" r="1" fill="#f5e0dc"/>
+    <circle cx="670" cy="40" r="1.5" fill="#fab387"/>
+    <circle cx="750" cy="42" r="1" fill="#89b4fa"/>
+    <circle cx="90" cy="210" r="1.5" fill="#94e2d5"/>
+    <circle cx="70" cy="220" r="1" fill="#fab387"/>
+    <circle cx="110" cy="225" r="1.5" fill="#89b4fa"/>
+    <circle cx="85" cy="235" r="1" fill="#cba6f7"/>
+    <circle cx="55" cy="215" r="1" fill="#94e2d5"/>
+    <circle cx="120" cy="215" r="1" fill="#fab387"/>
+  </g>
+
+  <!-- Anchor icon — centered above the title -->
+  <g transform="translate(400,68) scale(0.42)" filter="url(#anchor-glow)">
+    <circle cx="0" cy="-56" r="16" stroke="url(#anchor-grad)" stroke-width="10" fill="none"/>
+    <line x1="0" y1="-40" x2="0" y2="72" stroke="url(#anchor-grad)" stroke-width="10" stroke-linecap="round"/>
+    <line x1="-40" y1="-4" x2="40" y2="-4" stroke="url(#anchor-grad)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M-56 72 Q-56 32 0 32" stroke="url(#anchor-grad)" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M56 72 Q56 32 0 32" stroke="url(#anchor-grad)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Title -->
+  <text x="400" y="160" font-family="'SF Mono','Fira Code','JetBrains Mono','Cascadia Code',Consolas,monospace"
+        font-size="56" font-weight="bold" fill="url(#title-grad)" text-anchor="middle"
+        letter-spacing="6" filter="url(#glow)">SUNKEN ARCHIVE</text>
+
+  <!-- Accent line under title -->
+  <rect x="160" y="174" width="480" height="2" rx="1" fill="url(#accent-line)"/>
+
+  <!-- Subtitle -->
+  <text x="400" y="202" font-family="'SF Mono','Fira Code','JetBrains Mono','Cascadia Code',Consolas,monospace"
+        font-size="13" fill="#a6adc8" text-anchor="middle"
+        letter-spacing="5">A DIGITAL GARDEN FOR THE DEEP</text>
+</svg>

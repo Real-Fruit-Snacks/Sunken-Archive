@@ -1,0 +1,40 @@
+# OS
+.DS_Store
+
+# Dependencies
+node_modules
+
+# Build output
+public
+tsconfig.tsbuildinfo
+
+# Quartz cache
+.quartz-cache
+prof
+
+# Obsidian
+.obsidian
+
+# Private content
+private/
+
+# Environment / secrets
+.env
+.env.*
+
+# AI tools
+AGENTS.md
+.omc/
+.claude/
+.cursor/
+.windsurf/
+.aider*
+.copilot/
+.codeium/
+.continue/
+.augment/
+*.prompt
+
+# Replit
+.replit
+replit.nix

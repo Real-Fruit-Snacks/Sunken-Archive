@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <rect width="256" height="256" rx="48" fill="#1e1e2e"/>
+  <g transform="translate(128,128)">
+    <!-- Ring at top -->
+    <circle cx="0" cy="-56" r="16" stroke="#fab387" stroke-width="12" fill="none"/>
+    <!-- Vertical shaft -->
+    <line x1="0" y1="-40" x2="0" y2="72" stroke="#fab387" stroke-width="12" stroke-linecap="round"/>
+    <!-- Horizontal crossbar -->
+    <line x1="-40" y1="-4" x2="40" y2="-4" stroke="#fab387" stroke-width="12" stroke-linecap="round"/>
+    <!-- Left fluke -->
+    <path d="M-56 72 Q-56 32 0 32" stroke="#fab387" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <!-- Right fluke -->
+    <path d="M56 72 Q56 32 0 32" stroke="#fab387" stroke-width="12" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

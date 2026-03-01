@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cron Expression Parser — Sunken Archive</title>
+  <style>
+    :root {
+      --base: #1e1e2e; --mantle: #181825; --surface0: #313244; --surface1: #45475a;
+      --overlay0: #6c7086; --text: #cdd6f4; --subtext0: #a6adc8;
+      --peach: #fab387; --green: #a6e3a1; --blue: #89b4fa; --red: #f38ba8;
+      --yellow: #f9e2af; --mauve: #cba6f7;
+      --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "IBM Plex Mono", "Fira Code", monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--base); color: var(--text); font-family: var(--font); padding: 0.5rem 0; display: flex; justify-content: center; }
+    .container { max-width: 720px; width: 100%; }
+
+    input.cron-input {
+      width: 100%; padding: 0.75rem 1rem; font-size: 1.2rem; font-family: var(--font-mono);
+      background: var(--surface0); border: 2px solid var(--surface1); border-radius: 8px;
+      color: var(--text); outline: none; text-align: center; letter-spacing: 0.1em; margin-bottom: 1rem;
+    }
+    input.cron-input:focus { border-color: var(--peach); }
+    input.cron-input::placeholder { color: var(--overlay0); }
+
+    .human-readable {
+      background: var(--mantle); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;
+      text-align: center; font-size: 1.1rem; color: var(--green); min-height: 50px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .human-readable.error { color: var(--red); }
+
+    .field-breakdown {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+    .field-card {
+      background: var(--mantle); border-radius: 8px; padding: 0.6rem; text-align: center;
+    }
+    .field-card .field-value { font-family: var(--font-mono); font-size: 1.1rem; color: var(--peach); margin-bottom: 0.2rem; }
+    .field-card .field-name { font-size: 0.7rem; color: var(--subtext0); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
+    .field-card .field-desc { font-size: 0.75rem; color: var(--blue); }
+
+    .next-runs { background: var(--mantle); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .next-runs .label { font-size: 0.75rem; color: var(--subtext0); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .run-item { padding: 0.3rem 0; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text); border-bottom: 1px solid var(--surface0); }
+    .run-item:last-child { border-bottom: none; }
+    .run-item .run-rel { color: var(--subtext0); font-family: var(--font); margin-left: 0.5rem; font-size: 0.8rem; }
+
+    .presets { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .preset-chip {
+      background: var(--surface0); border: 1px solid var(--surface1); color: var(--subtext0);
+      padding: 0.3rem 0.6rem; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
+    }
+    .preset-chip:hover { color: var(--text); border-color: var(--peach); }
+    .preset-chip code { font-family: var(--font-mono); color: var(--peach); margin-right: 0.3rem; }
+
+    .note { font-size: 0.8rem; color: var(--overlay0); font-style: italic; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/Sunken-Archive/" style="display:inline-block;margin-bottom:1rem;color:var(--peach);text-decoration:none;font-size:0.9rem;">← Sunken Archive</a>
+    <input type="text" class="cron-input" id="cronInput" placeholder="* * * * *" value="0 9 * * 1-5" autofocus>
+
+    <div class="presets">
+      <div class="preset-chip" data-val="* * * * *"><code>* * * * *</code> Every minute</div>
+      <div class="preset-chip" data-val="0 * * * *"><code>0 * * * *</code> Every hour</div>
+      <div class="preset-chip" data-val="0 0 * * *"><code>0 0 * * *</code> Daily midnight</div>
+      <div class="preset-chip" data-val="0 9 * * 1-5"><code>0 9 * * 1-5</code> Weekdays 9am</div>
+      <div class="preset-chip" data-val="*/15 * * * *"><code>*/15 * * * *</code> Every 15 min</div>
+      <div class="preset-chip" data-val="0 0 * * 0"><code>0 0 * * 0</code> Weekly Sunday</div>
+      <div class="preset-chip" data-val="0 0 1 * *"><code>0 0 1 * *</code> Monthly 1st</div>
+      <div class="preset-chip" data-val="30 2 * * *"><code>30 2 * * *</code> Daily 2:30am</div>
+    </div>
+
+    <div class="human-readable" id="humanReadable">At 09:00, Monday through Friday</div>
+
+    <div class="field-breakdown" id="fieldBreakdown"></div>
+
+    <div class="next-runs" id="nextRuns">
+      <div class="label">Next 5 Runs</div>
+    </div>
+
+    <div class="note">Standard 5-field cron syntax (minute, hour, day, month, weekday)</div>
+  </div>
+
+  <script>
+    const cronInput = document.getElementById("cronInput");
+    const humanReadable = document.getElementById("humanReadable");
+    const fieldBreakdown = document.getElementById("fieldBreakdown");
+    const nextRunsDiv = document.getElementById("nextRuns");
+
+    const MONTHS = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function parseField(field, min, max) {
+      const values = new Set();
+      for (const part of field.split(",")) {
+        const stepMatch = part.match(/^(.+)\/(\d+)$/);
+        let range = stepMatch ? stepMatch[1] : part;
+        const step = stepMatch ? parseInt(stepMatch[2]) : 1;
+        if (range === "*") { for (let i = min; i <= max; i += step) values.add(i); }
+        else {
+          const rm = range.match(/^(\d+)-(\d+)$/);
+          if (rm) { for (let i = parseInt(rm[1]); i <= parseInt(rm[2]); i += step) values.add(i); }
+          else { values.add(parseInt(range)); }
+        }
+      }
+      return [...values].sort((a, b) => a - b);
+    }
+
+    function describeField(field, names) {
+      if (field === "*") return "every";
+      const parts = field.split(",").map(p => {
+        const stepMatch = p.match(/^(.+)\/(\d+)$/);
+        if (stepMatch) {
+          const base = stepMatch[1] === "*" ? "every" : stepMatch[1];
+          return `every ${stepMatch[2]}${base !== "every" ? " from " + base : ""}`;
+        }
+        const rm = p.match(/^(\d+)-(\d+)$/);
+        if (rm && names) return `${names[parseInt(rm[1])] || rm[1]} through ${names[parseInt(rm[2])] || rm[2]}`;
+        if (rm) return `${rm[1]}-${rm[2]}`;
+        if (names && names[parseInt(p)]) return names[parseInt(p)];
+        return p;
+      });
+      return parts.join(", ");
+    }
+
+    function toHuman(fields) {
+      const [min, hr, dom, mon, dow] = fields;
+      let parts = [];
+
+      // Time
+      if (min === "*" && hr === "*") parts.push("Every minute");
+      else if (min.includes("/")) parts.push(`Every ${min.split("/")[1]} minutes`);
+      else if (hr === "*") parts.push(`At minute ${min}`);
+      else if (hr.includes("/")) parts.push(`At minute ${min}, every ${hr.split("/")[1]} hours`);
+      else {
+        const hours = hr.split(",");
+        const mins = min.padStart(2, "0");
+        if (hours.length === 1 && !hr.includes("-")) {
+          parts.push(`At ${hr.padStart(2, "0")}:${mins}`);
+        } else {
+          parts.push(`At minute ${mins} past hour ${describeField(hr)}`);
+        }
+      }
+
+      // Day of month
+      if (dom !== "*") {
+        const suffix = n => { const s = ["th","st","nd","rd"]; const v = n % 100; return n + (s[(v-20)%10]||s[v]||s[0]); };
+        const vals = dom.split(",").map(d => {
+          if (d.includes("-")) return `${d}`;
+          return suffix(parseInt(d));
+        });
+        parts.push(`on the ${vals.join(", ")}`);
+      }
+
+      // Month
+      if (mon !== "*") parts.push(`in ${describeField(mon, MONTHS)}`);
+
+      // Day of week
+      if (dow !== "*") parts.push(`${describeField(dow, DAYS)}`);
+
+      return parts.join(", ");
+    }
+
+    function getNextRuns(fields, count) {
+      const [minF, hrF, domF, monF, dowF] = fields;
+      const mins = parseField(minF, 0, 59);
+      const hrs = parseField(hrF, 0, 23);
+      const doms = parseField(domF, 1, 31);
+      const mons = parseField(monF, 1, 12);
+      const dows = parseField(dowF, 0, 6);
+
+      const runs = [];
+      const now = new Date();
+      const d = new Date(now);
+      d.setSeconds(0); d.setMilliseconds(0);
+
+      const maxIter = 525600; // 1 year of minutes
+      for (let i = 0; i < maxIter && runs.length < count; i++) {
+        d.setMinutes(d.getMinutes() + (i === 0 ? 1 : 1));
+        if (!mons.includes(d.getMonth() + 1)) continue;
+        const domMatch = domF === "*" || doms.includes(d.getDate());
+        const dowMatch = dowF === "*" || dows.includes(d.getDay());
+        // If both dom and dow are specified, either can match (OR logic per cron spec)
+        if (domF !== "*" && dowF !== "*") { if (!domMatch && !dowMatch) continue; }
+        else { if (!domMatch || !dowMatch) continue; }
+        if (!hrs.includes(d.getHours())) continue;
+        if (!mins.includes(d.getMinutes())) continue;
+        runs.push(new Date(d));
+      }
+      return runs;
+    }
+
+    function relativeTime(date) {
+      const diff = date - new Date();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 60) return `in ${mins}m`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `in ${hrs}h ${mins % 60}m`;
+      const days = Math.floor(hrs / 24);
+      return `in ${days}d ${hrs % 24}h`;
+    }
+
+    function update() {
+      const expr = cronInput.value.trim();
+      const fields = expr.split(/\s+/);
+
+      if (fields.length !== 5) {
+        humanReadable.textContent = "Expected 5 fields: minute hour day month weekday";
+        humanReadable.classList.add("error");
+        fieldBreakdown.innerHTML = "";
+        nextRunsDiv.innerHTML = '<div class="label">Next 5 Runs</div><div style="color:var(--overlay0);font-style:italic;text-align:center;padding:0.5rem;">—</div>';
+        return;
+      }
+
+      humanReadable.classList.remove("error");
+
+      try {
+        humanReadable.textContent = toHuman(fields);
+      } catch (e) {
+        humanReadable.textContent = "Could not parse expression";
+        humanReadable.classList.add("error");
+      }
+
+      const names = ["Minute", "Hour", "Day (month)", "Month", "Day (week)"];
+      const ranges = ["0-59", "0-23", "1-31", "1-12", "0-6"];
+      const descNames = [null, null, null, MONTHS, DAYS];
+      fieldBreakdown.innerHTML = fields.map((f, i) =>
+        `<div class="field-card">
+          <div class="field-value">${f}</div>
+          <div class="field-name">${names[i]}</div>
+          <div class="field-desc">${describeField(f, descNames[i])}</div>
+        </div>`
+      ).join("");
+
+      try {
+        const runs = getNextRuns(fields, 5);
+        const runsHtml = runs.map(r =>
+          `<div class="run-item">${r.toLocaleString("en-US", { weekday:"short", year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit", hour12:false })}<span class="run-rel">${relativeTime(r)}</span></div>`
+        ).join("");
+        nextRunsDiv.innerHTML = `<div class="label">Next 5 Runs</div>${runsHtml || '<div style="color:var(--overlay0);padding:0.5rem;">No upcoming runs found</div>'}`;
+      } catch (e) {
+        nextRunsDiv.innerHTML = '<div class="label">Next 5 Runs</div><div style="color:var(--red);padding:0.5rem;">Error calculating runs</div>';
+      }
+    }
+
+    cronInput.addEventListener("input", update);
+    document.querySelectorAll(".preset-chip").forEach(chip => {
+      chip.addEventListener("click", () => { cronInput.value = chip.dataset.val; update(); });
+    });
+
+    update();
+  </script>
+</body>
+</html>

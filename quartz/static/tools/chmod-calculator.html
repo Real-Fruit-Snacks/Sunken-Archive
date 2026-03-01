@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chmod Calculator — Sunken Archive</title>
+  <style>
+    :root {
+      --base: #1e1e2e; --mantle: #181825; --surface0: #313244; --surface1: #45475a;
+      --overlay0: #6c7086; --text: #cdd6f4; --subtext0: #a6adc8;
+      --peach: #fab387; --green: #a6e3a1; --blue: #89b4fa; --red: #f38ba8;
+      --yellow: #f9e2af; --mauve: #cba6f7;
+      --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "IBM Plex Mono", "Fira Code", monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--base); color: var(--text); font-family: var(--font); padding: 0.5rem 0; display: flex; justify-content: center; }
+    .container { max-width: 720px; width: 100%; }
+
+    .output-row {
+      display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .output-card {
+      background: var(--mantle); border-radius: 8px; padding: 0.75rem 1rem; flex: 1; min-width: 200px;
+    }
+    .output-card .label { font-size: 0.75rem; color: var(--subtext0); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .output-card .value { font-family: var(--font-mono); font-size: 1.3rem; color: var(--peach); }
+    .output-card .value.green { color: var(--green); }
+
+    .numeric-input {
+      display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+    .numeric-input label { font-size: 0.85rem; color: var(--subtext0); }
+    .numeric-input input {
+      width: 80px; padding: 0.5rem; font-size: 1.1rem; font-family: var(--font-mono);
+      background: var(--surface0); border: 2px solid var(--surface1); border-radius: 8px;
+      color: var(--text); outline: none; text-align: center;
+    }
+    .numeric-input input:focus { border-color: var(--peach); }
+
+    .perm-table { width: 100%; border-collapse: collapse; }
+    .perm-table th {
+      text-align: center; padding: 0.5rem; font-size: 0.8rem; color: var(--subtext0);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--surface1);
+    }
+    .perm-table th:first-child { text-align: left; }
+    .perm-table td { text-align: center; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--surface0); }
+    .perm-table td:first-child { text-align: left; color: var(--subtext0); font-size: 0.9rem; }
+
+    .perm-table .role-owner td:first-child { color: var(--peach); }
+    .perm-table .role-group td:first-child { color: var(--green); }
+    .perm-table .role-other td:first-child { color: var(--blue); }
+
+    .check-wrap {
+      display: flex; align-items: center; justify-content: center;
+    }
+    .check-wrap input[type="checkbox"] {
+      appearance: none; width: 22px; height: 22px; border: 2px solid var(--surface1);
+      border-radius: 4px; background: var(--surface0); cursor: pointer; position: relative;
+    }
+    .check-wrap input[type="checkbox"]:checked { background: var(--peach); border-color: var(--peach); }
+    .check-wrap input[type="checkbox"]:checked::after {
+      content: "\2713"; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); color: var(--base); font-size: 14px; font-weight: 700;
+    }
+
+    .octal-cell { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 600; }
+    .role-owner .octal-cell { color: var(--peach); }
+    .role-group .octal-cell { color: var(--green); }
+    .role-other .octal-cell { color: var(--blue); }
+
+    .common-presets {
+      margin-top: 1.5rem; background: var(--mantle); border-radius: 8px; padding: 1rem;
+    }
+    .common-presets .label { font-size: 0.75rem; color: var(--subtext0); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .preset-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .preset-chip {
+      background: var(--surface0); border: 1px solid var(--surface1); color: var(--subtext0);
+      padding: 0.3rem 0.7rem; border-radius: 5px; cursor: pointer; font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .preset-chip:hover { color: var(--text); border-color: var(--peach); }
+    .preset-chip span { color: var(--overlay0); font-family: var(--font); margin-left: 0.3rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/Sunken-Archive/" style="display:inline-block;margin-bottom:1rem;color:var(--peach);text-decoration:none;font-size:0.9rem;">← Sunken Archive</a>
+    <div class="numeric-input">
+      <label>Octal:</label>
+      <input type="text" id="octalInput" maxlength="4" value="755" autofocus>
+    </div>
+
+    <div class="output-row">
+      <div class="output-card">
+        <div class="label">Numeric</div>
+        <div class="value" id="numericOut">755</div>
+      </div>
+      <div class="output-card">
+        <div class="label">Symbolic</div>
+        <div class="value green" id="symbolicOut">rwxr-xr-x</div>
+      </div>
+      <div class="output-card">
+        <div class="label">Command</div>
+        <div class="value" id="commandOut" style="font-size:1rem;">chmod 755 file</div>
+      </div>
+    </div>
+
+    <table class="perm-table">
+      <thead>
+        <tr><th></th><th>Read (4)</th><th>Write (2)</th><th>Execute (1)</th><th>Octal</th></tr>
+      </thead>
+      <tbody>
+        <tr class="role-owner">
+          <td>Owner</td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="owner" data-perm="read" checked></div></td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="owner" data-perm="write" checked></div></td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="owner" data-perm="exec" checked></div></td>
+          <td class="octal-cell" id="ownerOctal">7</td>
+        </tr>
+        <tr class="role-group">
+          <td>Group</td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="group" data-perm="read" checked></div></td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="group" data-perm="write"></div></td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="group" data-perm="exec" checked></div></td>
+          <td class="octal-cell" id="groupOctal">5</td>
+        </tr>
+        <tr class="role-other">
+          <td>Others</td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="other" data-perm="read" checked></div></td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="other" data-perm="write"></div></td>
+          <td><div class="check-wrap"><input type="checkbox" data-role="other" data-perm="exec" checked></div></td>
+          <td class="octal-cell" id="otherOctal">5</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="common-presets">
+      <div class="label">Common Presets</div>
+      <div class="preset-grid">
+        <div class="preset-chip" data-val="777">777 <span>Full access</span></div>
+        <div class="preset-chip" data-val="755">755 <span>Standard dir</span></div>
+        <div class="preset-chip" data-val="750">750 <span>Group access</span></div>
+        <div class="preset-chip" data-val="700">700 <span>Owner only</span></div>
+        <div class="preset-chip" data-val="664">664 <span>Shared file</span></div>
+        <div class="preset-chip" data-val="644">644 <span>Standard file</span></div>
+        <div class="preset-chip" data-val="600">600 <span>Private file</span></div>
+        <div class="preset-chip" data-val="400">400 <span>Read-only</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const checks = document.querySelectorAll('input[type="checkbox"]');
+    const octalInput = document.getElementById("octalInput");
+    const permMap = { read: 4, write: 2, exec: 1 };
+
+    function getOctalForRole(role) {
+      let val = 0;
+      checks.forEach(cb => { if (cb.dataset.role === role && cb.checked) val += permMap[cb.dataset.perm]; });
+      return val;
+    }
+
+    function toSymbolic(o, g, oth) {
+      const s = (v, r, w, x) => (v & 4 ? r : "-") + (v & 2 ? w : "-") + (v & 1 ? x : "-");
+      return s(o, "r", "w", "x") + s(g, "r", "w", "x") + s(oth, "r", "w", "x");
+    }
+
+    function updateFromCheckboxes() {
+      const o = getOctalForRole("owner"), g = getOctalForRole("group"), oth = getOctalForRole("other");
+      document.getElementById("ownerOctal").textContent = o;
+      document.getElementById("groupOctal").textContent = g;
+      document.getElementById("otherOctal").textContent = oth;
+      const num = "" + o + g + oth;
+      octalInput.value = num;
+      document.getElementById("numericOut").textContent = num;
+      document.getElementById("symbolicOut").textContent = toSymbolic(o, g, oth);
+      document.getElementById("commandOut").textContent = "chmod " + num + " file";
+    }
+
+    function setFromOctal(str) {
+      const digits = str.padStart(3, "0").slice(-3);
+      const vals = [parseInt(digits[0])||0, parseInt(digits[1])||0, parseInt(digits[2])||0];
+      const roles = ["owner", "group", "other"];
+      roles.forEach((role, i) => {
+        checks.forEach(cb => {
+          if (cb.dataset.role === role) cb.checked = !!(vals[i] & permMap[cb.dataset.perm]);
+        });
+      });
+      updateFromCheckboxes();
+    }
+
+    checks.forEach(cb => cb.addEventListener("change", updateFromCheckboxes));
+
+    octalInput.addEventListener("input", () => {
+      const v = octalInput.value.replace(/[^0-7]/g, "").slice(0, 3);
+      if (v.length > 0) setFromOctal(v);
+    });
+
+    document.querySelectorAll(".preset-chip").forEach(chip => {
+      chip.addEventListener("click", () => { octalInput.value = chip.dataset.val; setFromOctal(chip.dataset.val); });
+    });
+  </script>
+</body>
+</html>

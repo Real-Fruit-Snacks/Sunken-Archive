@@ -12,7 +12,7 @@ export const Favicon: QuartzEmitterPlugin = () => ({
     const faviconContent = sharp(iconPath).resize(48, 48).toFormat("png")
 
     yield write({
-      ctx: { argv } as BuildCtx,
+      ctx: { argv } as Pick<BuildCtx, "argv">,
       slug: "favicon" as FullSlug,
       ext: ".ico",
       content: faviconContent,

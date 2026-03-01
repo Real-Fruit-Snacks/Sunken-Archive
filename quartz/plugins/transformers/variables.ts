@@ -2,7 +2,7 @@ import { QuartzTransformerPlugin } from "../types"
 import { visit } from "unist-util-visit"
 import { Element, Text, ElementContent } from "hast"
 
-const VARIABLE_RE = /<([A-Za-z][A-Za-z0-9_-]*)>/g
+const VARIABLE_RE = /<([A-Za-z][A-Za-z0-9_-]*)>/
 
 export const HighlightVariables: QuartzTransformerPlugin = () => {
   return {

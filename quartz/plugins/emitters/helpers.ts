@@ -5,7 +5,7 @@ import { FilePath, FullSlug, joinSegments } from "../../util/path"
 import { Readable } from "stream"
 
 type WriteOptions = {
-  ctx: BuildCtx
+  ctx: Pick<BuildCtx, "argv">
   slug: FullSlug
   ext: `.${string}` | ""
   content: string | Buffer | Readable

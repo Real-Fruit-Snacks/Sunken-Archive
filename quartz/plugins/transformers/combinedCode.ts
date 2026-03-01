@@ -40,7 +40,10 @@ export const CombinedCode: QuartzTransformerPlugin = () => {
           const blocks: { lang: string; text: string }[] = []
 
           visit(tree, "element", (node: Element) => {
-            if (node.tagName !== "figure" || !node.properties?.["dataRehypePrettyCodeFigure"])
+            if (
+              node.tagName !== "figure" ||
+              !("dataRehypePrettyCodeFigure" in (node.properties ?? {}))
+            )
               return
 
             const pre = node.children.find(

@@ -1,181 +1,501 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Port Reference — Sunken Archive</title>
-  <style>
-    :root {
-      --base: #1e1e2e; --mantle: #181825; --surface0: #313244; --surface1: #45475a;
-      --overlay0: #6c7086; --text: #cdd6f4; --subtext0: #a6adc8;
-      --peach: #fab387; --green: #a6e3a1; --blue: #89b4fa; --red: #f38ba8;
-      --yellow: #f9e2af; --mauve: #cba6f7; --teal: #94e2d5;
-      --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "IBM Plex Mono", "Fira Code", monospace;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--base); color: var(--text); font-family: var(--font); padding: 0.5rem 0; display: flex; justify-content: center; }
-    .container { max-width: 720px; width: 100%; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Port Reference — Sunken Archive</title>
+    <style>
+      :root {
+        --base: #1e1e2e;
+        --mantle: #181825;
+        --surface0: #313244;
+        --surface1: #45475a;
+        --overlay0: #6c7086;
+        --text: #cdd6f4;
+        --subtext0: #a6adc8;
+        --peach: #fab387;
+        --green: #a6e3a1;
+        --blue: #89b4fa;
+        --red: #f38ba8;
+        --yellow: #f9e2af;
+        --mauve: #cba6f7;
+        --teal: #94e2d5;
+        --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-mono: "IBM Plex Mono", "Fira Code", monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--base);
+        color: var(--text);
+        font-family: var(--font);
+        padding: 0.5rem 0;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        max-width: 720px;
+        width: 100%;
+      }
 
-    input.search {
-      width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-family: var(--font);
-      background: var(--surface0); border: 2px solid var(--surface1); border-radius: 8px;
-      color: var(--text); outline: none; margin-bottom: 0.75rem;
-    }
-    input.search:focus { border-color: var(--peach); }
-    input.search::placeholder { color: var(--overlay0); }
+      input.search {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-family: var(--font);
+        background: var(--surface0);
+        border: 2px solid var(--surface1);
+        border-radius: 8px;
+        color: var(--text);
+        outline: none;
+        margin-bottom: 0.75rem;
+      }
+      input.search:focus {
+        border-color: var(--peach);
+      }
+      input.search::placeholder {
+        color: var(--overlay0);
+      }
 
-    .filter-row { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .filter-btn {
-      background: var(--surface0); border: 1px solid var(--surface1); color: var(--subtext0);
-      padding: 0.25rem 0.6rem; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
-    }
-    .filter-btn:hover { color: var(--text); }
-    .filter-btn.active { border-color: var(--peach); color: var(--peach); }
+      .filter-row {
+        display: flex;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+      .filter-btn {
+        background: var(--surface0);
+        border: 1px solid var(--surface1);
+        color: var(--subtext0);
+        padding: 0.25rem 0.6rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.8rem;
+      }
+      .filter-btn:hover {
+        color: var(--text);
+      }
+      .filter-btn.active {
+        border-color: var(--peach);
+        color: var(--peach);
+      }
 
-    .count { font-size: 0.8rem; color: var(--overlay0); margin-bottom: 0.75rem; }
+      .count {
+        font-size: 0.8rem;
+        color: var(--overlay0);
+        margin-bottom: 0.75rem;
+      }
 
-    .port-list { display: flex; flex-direction: column; gap: 0.4rem; }
-    .port-item {
-      display: grid; grid-template-columns: 70px 1fr auto; gap: 0.75rem; align-items: center;
-      background: var(--mantle); border-radius: 6px; padding: 0.6rem 0.75rem;
-    }
-    .port-num { font-family: var(--font-mono); font-size: 1rem; font-weight: 600; color: var(--peach); }
-    .port-name { font-size: 0.9rem; }
-    .port-desc { font-size: 0.8rem; color: var(--subtext0); }
-    .port-proto {
-      font-family: var(--font-mono); font-size: 0.75rem; padding: 0.15rem 0.4rem;
-      border-radius: 4px; background: var(--surface0);
-    }
-    .port-proto.tcp { color: var(--blue); }
-    .port-proto.udp { color: var(--green); }
-    .port-proto.both { color: var(--mauve); }
+      .port-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .port-item {
+        display: grid;
+        grid-template-columns: 70px 1fr auto;
+        gap: 0.75rem;
+        align-items: center;
+        background: var(--mantle);
+        border-radius: 6px;
+        padding: 0.6rem 0.75rem;
+      }
+      .port-num {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--peach);
+      }
+      .port-name {
+        font-size: 0.9rem;
+      }
+      .port-desc {
+        font-size: 0.8rem;
+        color: var(--subtext0);
+      }
+      .port-proto {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        background: var(--surface0);
+      }
+      .port-proto.tcp {
+        color: var(--blue);
+      }
+      .port-proto.udp {
+        color: var(--green);
+      }
+      .port-proto.both {
+        color: var(--mauve);
+      }
 
-    .cat-badge {
-      display: inline-block; font-size: 0.7rem; padding: 0.1rem 0.35rem; border-radius: 3px;
-      margin-left: 0.4rem; background: var(--surface0);
-    }
-    .cat-web { color: var(--blue); } .cat-mail { color: var(--yellow); }
-    .cat-file { color: var(--green); } .cat-remote { color: var(--peach); }
-    .cat-db { color: var(--mauve); } .cat-net { color: var(--teal); }
-    .cat-security { color: var(--red); } .cat-messaging { color: var(--yellow); }
-    .cat-monitoring { color: var(--green); } .cat-media { color: var(--peach); }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <a href="/Sunken-Archive/" style="display:inline-block;margin-bottom:1rem;color:var(--peach);text-decoration:none;font-size:0.9rem;">← Sunken Archive</a>
-    <input type="text" class="search" id="searchInput" placeholder="Search by port number, name, or description..." autofocus>
+      .cat-badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        padding: 0.1rem 0.35rem;
+        border-radius: 3px;
+        margin-left: 0.4rem;
+        background: var(--surface0);
+      }
+      .cat-web {
+        color: var(--blue);
+      }
+      .cat-mail {
+        color: var(--yellow);
+      }
+      .cat-file {
+        color: var(--green);
+      }
+      .cat-remote {
+        color: var(--peach);
+      }
+      .cat-db {
+        color: var(--mauve);
+      }
+      .cat-net {
+        color: var(--teal);
+      }
+      .cat-security {
+        color: var(--red);
+      }
+      .cat-messaging {
+        color: var(--yellow);
+      }
+      .cat-monitoring {
+        color: var(--green);
+      }
+      .cat-media {
+        color: var(--peach);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a
+        href="/Sunken-Archive/"
+        style="
+          display: inline-block;
+          margin-bottom: 1rem;
+          color: var(--peach);
+          text-decoration: none;
+          font-size: 0.9rem;
+        "
+        >← Sunken Archive</a
+      >
+      <input
+        type="text"
+        class="search"
+        id="searchInput"
+        placeholder="Search by port number, name, or description..."
+        autofocus
+      />
 
-    <div class="filter-row" id="filters">
-      <button class="filter-btn active" data-cat="all">All</button>
-      <button class="filter-btn" data-cat="web">Web</button>
-      <button class="filter-btn" data-cat="remote">Remote</button>
-      <button class="filter-btn" data-cat="file">File Transfer</button>
-      <button class="filter-btn" data-cat="mail">Mail</button>
-      <button class="filter-btn" data-cat="db">Database</button>
-      <button class="filter-btn" data-cat="net">Network</button>
-      <button class="filter-btn" data-cat="security">Security</button>
-      <button class="filter-btn" data-cat="messaging">Messaging</button>
-      <button class="filter-btn" data-cat="monitoring">Monitoring</button>
-      <button class="filter-btn" data-cat="media">Media</button>
+      <div class="filter-row" id="filters">
+        <button class="filter-btn active" data-cat="all">All</button>
+        <button class="filter-btn" data-cat="web">Web</button>
+        <button class="filter-btn" data-cat="remote">Remote</button>
+        <button class="filter-btn" data-cat="file">File Transfer</button>
+        <button class="filter-btn" data-cat="mail">Mail</button>
+        <button class="filter-btn" data-cat="db">Database</button>
+        <button class="filter-btn" data-cat="net">Network</button>
+        <button class="filter-btn" data-cat="security">Security</button>
+        <button class="filter-btn" data-cat="messaging">Messaging</button>
+        <button class="filter-btn" data-cat="monitoring">Monitoring</button>
+        <button class="filter-btn" data-cat="media">Media</button>
+      </div>
+
+      <div class="count" id="countDisplay">Showing 0 ports</div>
+      <div class="port-list" id="portList"></div>
     </div>
 
-    <div class="count" id="countDisplay">Showing 0 ports</div>
-    <div class="port-list" id="portList"></div>
-  </div>
+    <script>
+      const ports = [
+        { port: 20, name: "FTP Data", proto: "tcp", cat: "file", desc: "FTP data transfer" },
+        { port: 21, name: "FTP", proto: "tcp", cat: "file", desc: "FTP control/command" },
+        { port: 22, name: "SSH", proto: "tcp", cat: "remote", desc: "Secure Shell, SFTP, SCP" },
+        {
+          port: 23,
+          name: "Telnet",
+          proto: "tcp",
+          cat: "remote",
+          desc: "Unencrypted remote access (insecure)",
+        },
+        {
+          port: 25,
+          name: "SMTP",
+          proto: "tcp",
+          cat: "mail",
+          desc: "Simple Mail Transfer Protocol",
+        },
+        {
+          port: 43,
+          name: "WHOIS",
+          proto: "tcp",
+          cat: "net",
+          desc: "Domain/IP registration lookup",
+        },
+        { port: 53, name: "DNS", proto: "both", cat: "net", desc: "Domain Name System resolution" },
+        {
+          port: 67,
+          name: "DHCP Server",
+          proto: "udp",
+          cat: "net",
+          desc: "Dynamic Host Configuration (server)",
+        },
+        {
+          port: 68,
+          name: "DHCP Client",
+          proto: "udp",
+          cat: "net",
+          desc: "Dynamic Host Configuration (client)",
+        },
+        {
+          port: 69,
+          name: "TFTP",
+          proto: "udp",
+          cat: "file",
+          desc: "Trivial File Transfer Protocol",
+        },
+        { port: 80, name: "HTTP", proto: "tcp", cat: "web", desc: "Hypertext Transfer Protocol" },
+        {
+          port: 88,
+          name: "Kerberos",
+          proto: "both",
+          cat: "security",
+          desc: "Kerberos authentication",
+        },
+        { port: 110, name: "POP3", proto: "tcp", cat: "mail", desc: "Post Office Protocol v3" },
+        { port: 123, name: "NTP", proto: "udp", cat: "net", desc: "Network Time Protocol" },
+        {
+          port: 135,
+          name: "MS RPC",
+          proto: "tcp",
+          cat: "net",
+          desc: "Microsoft Remote Procedure Call",
+        },
+        {
+          port: 137,
+          name: "NetBIOS Name",
+          proto: "udp",
+          cat: "net",
+          desc: "NetBIOS name resolution",
+        },
+        {
+          port: 139,
+          name: "NetBIOS Session",
+          proto: "tcp",
+          cat: "net",
+          desc: "NetBIOS session service",
+        },
+        {
+          port: 143,
+          name: "IMAP",
+          proto: "tcp",
+          cat: "mail",
+          desc: "Internet Message Access Protocol",
+        },
+        {
+          port: 161,
+          name: "SNMP",
+          proto: "udp",
+          cat: "monitoring",
+          desc: "Simple Network Management Protocol",
+        },
+        {
+          port: 162,
+          name: "SNMP Trap",
+          proto: "udp",
+          cat: "monitoring",
+          desc: "SNMP trap notifications",
+        },
+        {
+          port: 389,
+          name: "LDAP",
+          proto: "tcp",
+          cat: "security",
+          desc: "Lightweight Directory Access Protocol",
+        },
+        { port: 443, name: "HTTPS", proto: "tcp", cat: "web", desc: "HTTP over TLS/SSL" },
+        {
+          port: 445,
+          name: "SMB",
+          proto: "tcp",
+          cat: "file",
+          desc: "Server Message Block / Windows shares",
+        },
+        { port: 465, name: "SMTPS", proto: "tcp", cat: "mail", desc: "SMTP over SSL (legacy)" },
+        {
+          port: 514,
+          name: "Syslog",
+          proto: "udp",
+          cat: "monitoring",
+          desc: "System logging protocol",
+        },
+        {
+          port: 587,
+          name: "SMTP Submission",
+          proto: "tcp",
+          cat: "mail",
+          desc: "Mail submission (STARTTLS)",
+        },
+        { port: 636, name: "LDAPS", proto: "tcp", cat: "security", desc: "LDAP over SSL" },
+        {
+          port: 853,
+          name: "DNS over TLS",
+          proto: "tcp",
+          cat: "net",
+          desc: "Encrypted DNS queries",
+        },
+        { port: 993, name: "IMAPS", proto: "tcp", cat: "mail", desc: "IMAP over SSL" },
+        { port: 995, name: "POP3S", proto: "tcp", cat: "mail", desc: "POP3 over SSL" },
+        { port: 1080, name: "SOCKS", proto: "tcp", cat: "net", desc: "SOCKS proxy protocol" },
+        { port: 1194, name: "OpenVPN", proto: "both", cat: "security", desc: "OpenVPN tunnel" },
+        { port: 1433, name: "MS SQL", proto: "tcp", cat: "db", desc: "Microsoft SQL Server" },
+        {
+          port: 1434,
+          name: "MS SQL Browser",
+          proto: "udp",
+          cat: "db",
+          desc: "SQL Server discovery",
+        },
+        {
+          port: 1521,
+          name: "Oracle DB",
+          proto: "tcp",
+          cat: "db",
+          desc: "Oracle database listener",
+        },
+        {
+          port: 1883,
+          name: "MQTT",
+          proto: "tcp",
+          cat: "messaging",
+          desc: "IoT messaging protocol",
+        },
+        { port: 2049, name: "NFS", proto: "tcp", cat: "file", desc: "Network File System" },
+        {
+          port: 3000,
+          name: "Grafana",
+          proto: "tcp",
+          cat: "monitoring",
+          desc: "Grafana dashboard (default)",
+        },
+        {
+          port: 3001,
+          name: "Uptime Kuma",
+          proto: "tcp",
+          cat: "monitoring",
+          desc: "Uptime monitoring (default)",
+        },
+        { port: 3306, name: "MySQL", proto: "tcp", cat: "db", desc: "MySQL / MariaDB database" },
+        { port: 3389, name: "RDP", proto: "tcp", cat: "remote", desc: "Remote Desktop Protocol" },
+        { port: 5432, name: "PostgreSQL", proto: "tcp", cat: "db", desc: "PostgreSQL database" },
+        {
+          port: 5672,
+          name: "AMQP",
+          proto: "tcp",
+          cat: "messaging",
+          desc: "RabbitMQ / AMQP messaging",
+        },
+        { port: 5900, name: "VNC", proto: "tcp", cat: "remote", desc: "Virtual Network Computing" },
+        { port: 6379, name: "Redis", proto: "tcp", cat: "db", desc: "Redis in-memory store" },
+        {
+          port: 6443,
+          name: "Kubernetes API",
+          proto: "tcp",
+          cat: "web",
+          desc: "K8s API server (HTTPS)",
+        },
+        {
+          port: 8080,
+          name: "HTTP Alt",
+          proto: "tcp",
+          cat: "web",
+          desc: "Alternative HTTP / proxy",
+        },
+        { port: 8443, name: "HTTPS Alt", proto: "tcp", cat: "web", desc: "Alternative HTTPS" },
+        { port: 8883, name: "MQTTS", proto: "tcp", cat: "messaging", desc: "MQTT over TLS" },
+        { port: 8096, name: "Jellyfin", proto: "tcp", cat: "media", desc: "Jellyfin media server" },
+        {
+          port: 8123,
+          name: "Home Assistant",
+          proto: "tcp",
+          cat: "monitoring",
+          desc: "Home automation",
+        },
+        { port: 8200, name: "Vault", proto: "tcp", cat: "security", desc: "HashiCorp Vault" },
+        { port: 8443, name: "HTTPS Alt", proto: "tcp", cat: "web", desc: "Alternative HTTPS" },
+        {
+          port: 9090,
+          name: "Prometheus",
+          proto: "tcp",
+          cat: "monitoring",
+          desc: "Metrics collection",
+        },
+        {
+          port: 9100,
+          name: "Node Exporter",
+          proto: "tcp",
+          cat: "monitoring",
+          desc: "Prometheus node metrics",
+        },
+        {
+          port: 9200,
+          name: "Elasticsearch",
+          proto: "tcp",
+          cat: "db",
+          desc: "Elasticsearch REST API",
+        },
+        {
+          port: 9443,
+          name: "Portainer",
+          proto: "tcp",
+          cat: "monitoring",
+          desc: "Portainer HTTPS UI",
+        },
+        { port: 11211, name: "Memcached", proto: "tcp", cat: "db", desc: "Memcached caching" },
+        { port: 27017, name: "MongoDB", proto: "tcp", cat: "db", desc: "MongoDB database" },
+        { port: 32400, name: "Plex", proto: "tcp", cat: "media", desc: "Plex media server" },
+        { port: 51413, name: "BitTorrent", proto: "tcp", cat: "file", desc: "BitTorrent client" },
+        { port: 51820, name: "WireGuard", proto: "udp", cat: "security", desc: "WireGuard VPN" },
+      ]
 
-  <script>
-    const ports = [
-      { port: 20, name: "FTP Data", proto: "tcp", cat: "file", desc: "FTP data transfer" },
-      { port: 21, name: "FTP", proto: "tcp", cat: "file", desc: "FTP control/command" },
-      { port: 22, name: "SSH", proto: "tcp", cat: "remote", desc: "Secure Shell, SFTP, SCP" },
-      { port: 23, name: "Telnet", proto: "tcp", cat: "remote", desc: "Unencrypted remote access (insecure)" },
-      { port: 25, name: "SMTP", proto: "tcp", cat: "mail", desc: "Simple Mail Transfer Protocol" },
-      { port: 43, name: "WHOIS", proto: "tcp", cat: "net", desc: "Domain/IP registration lookup" },
-      { port: 53, name: "DNS", proto: "both", cat: "net", desc: "Domain Name System resolution" },
-      { port: 67, name: "DHCP Server", proto: "udp", cat: "net", desc: "Dynamic Host Configuration (server)" },
-      { port: 68, name: "DHCP Client", proto: "udp", cat: "net", desc: "Dynamic Host Configuration (client)" },
-      { port: 69, name: "TFTP", proto: "udp", cat: "file", desc: "Trivial File Transfer Protocol" },
-      { port: 80, name: "HTTP", proto: "tcp", cat: "web", desc: "Hypertext Transfer Protocol" },
-      { port: 88, name: "Kerberos", proto: "both", cat: "security", desc: "Kerberos authentication" },
-      { port: 110, name: "POP3", proto: "tcp", cat: "mail", desc: "Post Office Protocol v3" },
-      { port: 123, name: "NTP", proto: "udp", cat: "net", desc: "Network Time Protocol" },
-      { port: 135, name: "MS RPC", proto: "tcp", cat: "net", desc: "Microsoft Remote Procedure Call" },
-      { port: 137, name: "NetBIOS Name", proto: "udp", cat: "net", desc: "NetBIOS name resolution" },
-      { port: 139, name: "NetBIOS Session", proto: "tcp", cat: "net", desc: "NetBIOS session service" },
-      { port: 143, name: "IMAP", proto: "tcp", cat: "mail", desc: "Internet Message Access Protocol" },
-      { port: 161, name: "SNMP", proto: "udp", cat: "monitoring", desc: "Simple Network Management Protocol" },
-      { port: 162, name: "SNMP Trap", proto: "udp", cat: "monitoring", desc: "SNMP trap notifications" },
-      { port: 389, name: "LDAP", proto: "tcp", cat: "security", desc: "Lightweight Directory Access Protocol" },
-      { port: 443, name: "HTTPS", proto: "tcp", cat: "web", desc: "HTTP over TLS/SSL" },
-      { port: 445, name: "SMB", proto: "tcp", cat: "file", desc: "Server Message Block / Windows shares" },
-      { port: 465, name: "SMTPS", proto: "tcp", cat: "mail", desc: "SMTP over SSL (legacy)" },
-      { port: 514, name: "Syslog", proto: "udp", cat: "monitoring", desc: "System logging protocol" },
-      { port: 587, name: "SMTP Submission", proto: "tcp", cat: "mail", desc: "Mail submission (STARTTLS)" },
-      { port: 636, name: "LDAPS", proto: "tcp", cat: "security", desc: "LDAP over SSL" },
-      { port: 853, name: "DNS over TLS", proto: "tcp", cat: "net", desc: "Encrypted DNS queries" },
-      { port: 993, name: "IMAPS", proto: "tcp", cat: "mail", desc: "IMAP over SSL" },
-      { port: 995, name: "POP3S", proto: "tcp", cat: "mail", desc: "POP3 over SSL" },
-      { port: 1080, name: "SOCKS", proto: "tcp", cat: "net", desc: "SOCKS proxy protocol" },
-      { port: 1194, name: "OpenVPN", proto: "both", cat: "security", desc: "OpenVPN tunnel" },
-      { port: 1433, name: "MS SQL", proto: "tcp", cat: "db", desc: "Microsoft SQL Server" },
-      { port: 1434, name: "MS SQL Browser", proto: "udp", cat: "db", desc: "SQL Server discovery" },
-      { port: 1521, name: "Oracle DB", proto: "tcp", cat: "db", desc: "Oracle database listener" },
-      { port: 1883, name: "MQTT", proto: "tcp", cat: "messaging", desc: "IoT messaging protocol" },
-      { port: 2049, name: "NFS", proto: "tcp", cat: "file", desc: "Network File System" },
-      { port: 3000, name: "Grafana", proto: "tcp", cat: "monitoring", desc: "Grafana dashboard (default)" },
-      { port: 3001, name: "Uptime Kuma", proto: "tcp", cat: "monitoring", desc: "Uptime monitoring (default)" },
-      { port: 3306, name: "MySQL", proto: "tcp", cat: "db", desc: "MySQL / MariaDB database" },
-      { port: 3389, name: "RDP", proto: "tcp", cat: "remote", desc: "Remote Desktop Protocol" },
-      { port: 5432, name: "PostgreSQL", proto: "tcp", cat: "db", desc: "PostgreSQL database" },
-      { port: 5672, name: "AMQP", proto: "tcp", cat: "messaging", desc: "RabbitMQ / AMQP messaging" },
-      { port: 5900, name: "VNC", proto: "tcp", cat: "remote", desc: "Virtual Network Computing" },
-      { port: 6379, name: "Redis", proto: "tcp", cat: "db", desc: "Redis in-memory store" },
-      { port: 6443, name: "Kubernetes API", proto: "tcp", cat: "web", desc: "K8s API server (HTTPS)" },
-      { port: 8080, name: "HTTP Alt", proto: "tcp", cat: "web", desc: "Alternative HTTP / proxy" },
-      { port: 8443, name: "HTTPS Alt", proto: "tcp", cat: "web", desc: "Alternative HTTPS" },
-      { port: 8883, name: "MQTTS", proto: "tcp", cat: "messaging", desc: "MQTT over TLS" },
-      { port: 8096, name: "Jellyfin", proto: "tcp", cat: "media", desc: "Jellyfin media server" },
-      { port: 8123, name: "Home Assistant", proto: "tcp", cat: "monitoring", desc: "Home automation" },
-      { port: 8200, name: "Vault", proto: "tcp", cat: "security", desc: "HashiCorp Vault" },
-      { port: 8443, name: "HTTPS Alt", proto: "tcp", cat: "web", desc: "Alternative HTTPS" },
-      { port: 9090, name: "Prometheus", proto: "tcp", cat: "monitoring", desc: "Metrics collection" },
-      { port: 9100, name: "Node Exporter", proto: "tcp", cat: "monitoring", desc: "Prometheus node metrics" },
-      { port: 9200, name: "Elasticsearch", proto: "tcp", cat: "db", desc: "Elasticsearch REST API" },
-      { port: 9443, name: "Portainer", proto: "tcp", cat: "monitoring", desc: "Portainer HTTPS UI" },
-      { port: 11211, name: "Memcached", proto: "tcp", cat: "db", desc: "Memcached caching" },
-      { port: 27017, name: "MongoDB", proto: "tcp", cat: "db", desc: "MongoDB database" },
-      { port: 32400, name: "Plex", proto: "tcp", cat: "media", desc: "Plex media server" },
-      { port: 51413, name: "BitTorrent", proto: "tcp", cat: "file", desc: "BitTorrent client" },
-      { port: 51820, name: "WireGuard", proto: "udp", cat: "security", desc: "WireGuard VPN" },
-    ];
+      const searchInput = document.getElementById("searchInput")
+      const portList = document.getElementById("portList")
+      const countDisplay = document.getElementById("countDisplay")
+      let activeCat = "all"
 
-    const searchInput = document.getElementById("searchInput");
-    const portList = document.getElementById("portList");
-    const countDisplay = document.getElementById("countDisplay");
-    let activeCat = "all";
+      document.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"))
+          btn.classList.add("active")
+          activeCat = btn.dataset.cat
+          render()
+        })
+      })
 
-    document.querySelectorAll(".filter-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        activeCat = btn.dataset.cat;
-        render();
-      });
-    });
+      function render() {
+        const q = searchInput.value.toLowerCase()
+        const filtered = ports.filter((p) => {
+          if (activeCat !== "all" && p.cat !== activeCat) return false
+          if (!q) return true
+          return (
+            String(p.port).includes(q) ||
+            p.name.toLowerCase().includes(q) ||
+            p.desc.toLowerCase().includes(q) ||
+            p.proto.includes(q)
+          )
+        })
 
-    function render() {
-      const q = searchInput.value.toLowerCase();
-      const filtered = ports.filter(p => {
-        if (activeCat !== "all" && p.cat !== activeCat) return false;
-        if (!q) return true;
-        return String(p.port).includes(q) || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.proto.includes(q);
-      });
+        countDisplay.textContent = `Showing ${filtered.length} port${filtered.length !== 1 ? "s" : ""}`
 
-      countDisplay.textContent = `Showing ${filtered.length} port${filtered.length !== 1 ? "s" : ""}`;
-
-      portList.innerHTML = filtered.map(p => `
+        portList.innerHTML = filtered
+          .map(
+            (p) => `
         <div class="port-item">
           <div class="port-num">${p.port}</div>
           <div>
@@ -184,11 +504,13 @@
           </div>
           <div class="port-proto ${p.proto}">${p.proto.toUpperCase()}</div>
         </div>
-      `).join("");
-    }
+      `,
+          )
+          .join("")
+      }
 
-    searchInput.addEventListener("input", render);
-    render();
-  </script>
-</body>
+      searchInput.addEventListener("input", render)
+      render()
+    </script>
+  </body>
 </html>

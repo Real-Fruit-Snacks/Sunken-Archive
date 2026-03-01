@@ -44,15 +44,15 @@ See [[Bookmarks]] for a curated list of web development links.
 A simple Express server:
 
 ```javascript
-import express from "express";
+import express from "express"
 
-const app = express();
+const app = express()
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello from the Sunken Archive API" });
-});
+  res.json({ message: "Hello from the Sunken Archive API" })
+})
 
 app.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+  console.log("Server running on port 3000")
+})
 ```

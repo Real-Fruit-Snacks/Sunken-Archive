@@ -16,12 +16,12 @@ Networking knowledge underpins both the [[Home Lab]] infrastructure and [[Web De
 
 ### The OSI Model (Simplified)
 
-| Layer       | Protocol Examples | What It Does              |
-| ----------- | ----------------- | ------------------------- |
-| Application | HTTP, DNS, SSH    | User-facing services      |
+| Layer       | Protocol Examples | What It Does                 |
+| ----------- | ----------------- | ---------------------------- |
+| Application | HTTP, DNS, SSH    | User-facing services         |
 | Transport   | TCP, UDP          | Reliable/unreliable delivery |
-| Network     | IP, ICMP          | Routing between networks  |
-| Link        | Ethernet, Wi-Fi   | Local network delivery    |
+| Network     | IP, ICMP          | Routing between networks     |
+| Link        | Ethernet, Wi-Fi   | Local network delivery       |
 
 ### DNS
 

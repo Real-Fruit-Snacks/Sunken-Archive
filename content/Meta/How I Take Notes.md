@@ -27,13 +27,13 @@ I follow a loosely **Zettelkasten-inspired** approach:
 
 The archive is organized into a few top-level folders:
 
-| Folder       | Purpose                          | Example                     |
-| ------------ | -------------------------------- | --------------------------- |
-| `Projects/`  | Active projects and endeavors    | [[Web Development]], [[Home Lab]] |
-| `Concepts/`  | Evergreen reference notes        | [[Docker]], [[Networking]]  |
-| `Daily/`     | Date-stamped journal entries     | [[2026-02-28]]              |
-| `Resources/` | Curated links and external refs  | [[Bookmarks]]               |
-| `Meta/`      | Notes about the system itself    | This note                   |
+| Folder       | Purpose                         | Example                           |
+| ------------ | ------------------------------- | --------------------------------- |
+| `Projects/`  | Active projects and endeavors   | [[Web Development]], [[Home Lab]] |
+| `Concepts/`  | Evergreen reference notes       | [[Docker]], [[Networking]]        |
+| `Daily/`     | Date-stamped journal entries    | [[2026-02-28]]                    |
+| `Resources/` | Curated links and external refs | [[Bookmarks]]                     |
+| `Meta/`      | Notes about the system itself   | This note                         |
 
 ## Tools
 

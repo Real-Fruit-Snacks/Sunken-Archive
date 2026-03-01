@@ -14,11 +14,11 @@ My home lab is where I experiment with self-hosting, [[Networking]], and infrast
 
 ## Hardware
 
-| Device         | Role          | OS           |
-| -------------- | ------------- | ------------ |
-| Mini PC        | Primary server | Debian 12    |
+| Device         | Role           | OS              |
+| -------------- | -------------- | --------------- |
+| Mini PC        | Primary server | Debian 12       |
 | Raspberry Pi 4 | DNS / Pi-hole  | Raspberry Pi OS |
-| Old Laptop     | Backup target  | Ubuntu Server |
+| Old Laptop     | Backup target  | Ubuntu Server   |
 
 ## Services
 

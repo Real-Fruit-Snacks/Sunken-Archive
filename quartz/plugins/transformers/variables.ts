@@ -15,10 +15,7 @@ export const HighlightVariables: QuartzTransformerPlugin = () => {
       return parts
         .map((part, i) => {
           if (i % 2 === 1) return part
-          return part.replace(
-            VARIABLE_RE,
-            '<span class="variable">&lt;$1&gt;</span>',
-          )
+          return part.replace(VARIABLE_RE, '<span class="variable">&lt;$1&gt;</span>')
         })
         .join("")
     },

@@ -1,250 +1,283 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Base64 Encoder/Decoder — Sunken Archive</title>
-  <style>
-    :root {
-      --base: #1e1e2e;
-      --mantle: #181825;
-      --surface0: #313244;
-      --surface1: #45475a;
-      --overlay0: #6c7086;
-      --text: #cdd6f4;
-      --subtext0: #a6adc8;
-      --peach: #fab387;
-      --green: #a6e3a1;
-      --blue: #89b4fa;
-      --red: #f38ba8;
-      --yellow: #f9e2af;
-      --mauve: #cba6f7;
-      --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "IBM Plex Mono", "Fira Code", monospace;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--base);
-      color: var(--text);
-      font-family: var(--font);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0.5rem 0;
-    }
-    .container { max-width: 720px; width: 100%; }
-
-    .mode-toggle {
-      display: flex;
-      gap: 0;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid var(--surface1);
-      width: fit-content;
-    }
-    .mode-btn {
-      background: var(--surface0);
-      border: none;
-      color: var(--subtext0);
-      padding: 0.5rem 1.25rem;
-      cursor: pointer;
-      font-family: var(--font);
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-    .mode-btn:hover { color: var(--text); }
-    .mode-btn.active {
-      background: var(--peach);
-      color: var(--base);
-      font-weight: 600;
-    }
-
-    .panels {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .panel {
-      position: relative;
-    }
-    .panel-label {
-      font-size: 0.75rem;
-      color: var(--subtext0);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      padding: 0.75rem 1rem;
-      font-size: 0.95rem;
-      font-family: var(--font-mono);
-      background: var(--surface0);
-      border: 2px solid var(--surface1);
-      border-radius: 8px;
-      color: var(--text);
-      outline: none;
-      resize: vertical;
-      transition: border-color 0.2s;
-    }
-    textarea:focus { border-color: var(--peach); }
-    textarea::placeholder { color: var(--overlay0); }
-    textarea.error { border-color: var(--red); }
-
-    .copy-btn {
-      position: absolute;
-      top: 1.75rem;
-      right: 0.5rem;
-      background: var(--surface1);
-      border: none;
-      color: var(--subtext0);
-      padding: 0.25rem 0.6rem;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: var(--font);
-      font-size: 0.75rem;
-    }
-    .copy-btn:hover { color: var(--text); }
-    .copy-btn.copied { color: var(--green); }
-
-    .stats-row {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 0.75rem;
-      padding: 0.5rem 0;
-    }
-    .stat {
-      font-size: 0.8rem;
-      color: var(--subtext0);
-    }
-    .stat span {
-      color: var(--peach);
-      font-family: var(--font-mono);
-      font-weight: 600;
-    }
-
-    .error-msg {
-      color: var(--red);
-      font-size: 0.85rem;
-      margin-top: 0.35rem;
-    }
-
-    .arrow {
-      text-align: center;
-      color: var(--overlay0);
-      font-size: 1.2rem;
-      padding: 0.25rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <a href="/Sunken-Archive/" style="display:inline-block;margin-bottom:1rem;color:var(--peach);text-decoration:none;font-size:0.9rem;">← Sunken Archive</a>
-    <div class="mode-toggle">
-      <button class="mode-btn active" id="encodeBtn">Encode</button>
-      <button class="mode-btn" id="decodeBtn">Decode</button>
-    </div>
-
-    <div class="panels">
-      <div class="panel">
-        <div class="panel-label" id="inputLabel">Plain Text</div>
-        <textarea id="inputArea" placeholder="Type or paste text here..."></textarea>
-      </div>
-
-      <div class="arrow" id="arrowIcon">&#8595;</div>
-
-      <div class="panel">
-        <div class="panel-label" id="outputLabel">Base64 Encoded</div>
-        <textarea id="outputArea" readonly placeholder="Result appears here..."></textarea>
-        <button class="copy-btn" id="copyBtn">Copy</button>
-        <div class="error-msg" id="errorMsg"></div>
-      </div>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat">Input: <span id="inputLen">0</span> chars</div>
-      <div class="stat">Output: <span id="outputLen">0</span> chars</div>
-      <div class="stat">Ratio: <span id="ratio">—</span></div>
-    </div>
-  </div>
-
-  <script>
-    const inputArea = document.getElementById("inputArea");
-    const outputArea = document.getElementById("outputArea");
-    const inputLabel = document.getElementById("inputLabel");
-    const outputLabel = document.getElementById("outputLabel");
-    const encodeBtn = document.getElementById("encodeBtn");
-    const decodeBtn = document.getElementById("decodeBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const errorMsg = document.getElementById("errorMsg");
-    const inputLen = document.getElementById("inputLen");
-    const outputLen = document.getElementById("outputLen");
-    const ratioEl = document.getElementById("ratio");
-
-    let mode = "encode";
-
-    function setMode(m) {
-      mode = m;
-      encodeBtn.classList.toggle("active", m === "encode");
-      decodeBtn.classList.toggle("active", m === "decode");
-      inputLabel.textContent = m === "encode" ? "Plain Text" : "Base64 Encoded";
-      outputLabel.textContent = m === "encode" ? "Base64 Encoded" : "Decoded Text";
-      inputArea.placeholder = m === "encode" ? "Type or paste text here..." : "Paste Base64 string here...";
-      convert();
-    }
-
-    function convert() {
-      const val = inputArea.value;
-      errorMsg.textContent = "";
-      outputArea.classList.remove("error");
-
-      if (!val) {
-        outputArea.value = "";
-        inputLen.textContent = "0";
-        outputLen.textContent = "0";
-        ratioEl.textContent = "\u2014";
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Base64 Encoder/Decoder — Sunken Archive</title>
+    <style>
+      :root {
+        --base: #1e1e2e;
+        --mantle: #181825;
+        --surface0: #313244;
+        --surface1: #45475a;
+        --overlay0: #6c7086;
+        --text: #cdd6f4;
+        --subtext0: #a6adc8;
+        --peach: #fab387;
+        --green: #a6e3a1;
+        --blue: #89b4fa;
+        --red: #f38ba8;
+        --yellow: #f9e2af;
+        --mauve: #cba6f7;
+        --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-mono: "IBM Plex Mono", "Fira Code", monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--base);
+        color: var(--text);
+        font-family: var(--font);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem 0;
+      }
+      .container {
+        max-width: 720px;
+        width: 100%;
       }
 
-      try {
-        if (mode === "encode") {
-          outputArea.value = btoa(unescape(encodeURIComponent(val)));
-        } else {
-          outputArea.value = decodeURIComponent(escape(atob(val.trim())));
+      .mode-toggle {
+        display: flex;
+        gap: 0;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid var(--surface1);
+        width: fit-content;
+      }
+      .mode-btn {
+        background: var(--surface0);
+        border: none;
+        color: var(--subtext0);
+        padding: 0.5rem 1.25rem;
+        cursor: pointer;
+        font-family: var(--font);
+        font-size: 0.9rem;
+        transition: all 0.2s;
+      }
+      .mode-btn:hover {
+        color: var(--text);
+      }
+      .mode-btn.active {
+        background: var(--peach);
+        color: var(--base);
+        font-weight: 600;
+      }
+
+      .panels {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .panel {
+        position: relative;
+      }
+      .panel-label {
+        font-size: 0.75rem;
+        color: var(--subtext0);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.35rem;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        font-family: var(--font-mono);
+        background: var(--surface0);
+        border: 2px solid var(--surface1);
+        border-radius: 8px;
+        color: var(--text);
+        outline: none;
+        resize: vertical;
+        transition: border-color 0.2s;
+      }
+      textarea:focus {
+        border-color: var(--peach);
+      }
+      textarea::placeholder {
+        color: var(--overlay0);
+      }
+      textarea.error {
+        border-color: var(--red);
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 1.75rem;
+        right: 0.5rem;
+        background: var(--surface1);
+        border: none;
+        color: var(--subtext0);
+        padding: 0.25rem 0.6rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: var(--font);
+        font-size: 0.75rem;
+      }
+      .copy-btn:hover {
+        color: var(--text);
+      }
+      .copy-btn.copied {
+        color: var(--green);
+      }
+
+      .stats-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.75rem;
+        padding: 0.5rem 0;
+      }
+      .stat {
+        font-size: 0.8rem;
+        color: var(--subtext0);
+      }
+      .stat span {
+        color: var(--peach);
+        font-family: var(--font-mono);
+        font-weight: 600;
+      }
+
+      .error-msg {
+        color: var(--red);
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+      }
+
+      .arrow {
+        text-align: center;
+        color: var(--overlay0);
+        font-size: 1.2rem;
+        padding: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a
+        href="/Sunken-Archive/"
+        style="
+          display: inline-block;
+          margin-bottom: 1rem;
+          color: var(--peach);
+          text-decoration: none;
+          font-size: 0.9rem;
+        "
+        >← Sunken Archive</a
+      >
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="encodeBtn">Encode</button>
+        <button class="mode-btn" id="decodeBtn">Decode</button>
+      </div>
+
+      <div class="panels">
+        <div class="panel">
+          <div class="panel-label" id="inputLabel">Plain Text</div>
+          <textarea id="inputArea" placeholder="Type or paste text here..."></textarea>
+        </div>
+
+        <div class="arrow" id="arrowIcon">&#8595;</div>
+
+        <div class="panel">
+          <div class="panel-label" id="outputLabel">Base64 Encoded</div>
+          <textarea id="outputArea" readonly placeholder="Result appears here..."></textarea>
+          <button class="copy-btn" id="copyBtn">Copy</button>
+          <div class="error-msg" id="errorMsg"></div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat">Input: <span id="inputLen">0</span> chars</div>
+        <div class="stat">Output: <span id="outputLen">0</span> chars</div>
+        <div class="stat">Ratio: <span id="ratio">—</span></div>
+      </div>
+    </div>
+
+    <script>
+      const inputArea = document.getElementById("inputArea")
+      const outputArea = document.getElementById("outputArea")
+      const inputLabel = document.getElementById("inputLabel")
+      const outputLabel = document.getElementById("outputLabel")
+      const encodeBtn = document.getElementById("encodeBtn")
+      const decodeBtn = document.getElementById("decodeBtn")
+      const copyBtn = document.getElementById("copyBtn")
+      const errorMsg = document.getElementById("errorMsg")
+      const inputLen = document.getElementById("inputLen")
+      const outputLen = document.getElementById("outputLen")
+      const ratioEl = document.getElementById("ratio")
+
+      let mode = "encode"
+
+      function setMode(m) {
+        mode = m
+        encodeBtn.classList.toggle("active", m === "encode")
+        decodeBtn.classList.toggle("active", m === "decode")
+        inputLabel.textContent = m === "encode" ? "Plain Text" : "Base64 Encoded"
+        outputLabel.textContent = m === "encode" ? "Base64 Encoded" : "Decoded Text"
+        inputArea.placeholder =
+          m === "encode" ? "Type or paste text here..." : "Paste Base64 string here..."
+        convert()
+      }
+
+      function convert() {
+        const val = inputArea.value
+        errorMsg.textContent = ""
+        outputArea.classList.remove("error")
+
+        if (!val) {
+          outputArea.value = ""
+          inputLen.textContent = "0"
+          outputLen.textContent = "0"
+          ratioEl.textContent = "\u2014"
+          return
         }
-      } catch (e) {
-        outputArea.value = "";
-        errorMsg.textContent = mode === "decode" ? "Invalid Base64 string" : "Encoding error";
-        outputArea.classList.add("error");
+
+        try {
+          if (mode === "encode") {
+            outputArea.value = btoa(unescape(encodeURIComponent(val)))
+          } else {
+            outputArea.value = decodeURIComponent(escape(atob(val.trim())))
+          }
+        } catch (e) {
+          outputArea.value = ""
+          errorMsg.textContent = mode === "decode" ? "Invalid Base64 string" : "Encoding error"
+          outputArea.classList.add("error")
+        }
+
+        inputLen.textContent = val.length
+        outputLen.textContent = outputArea.value.length
+        if (val.length > 0 && outputArea.value.length > 0) {
+          ratioEl.textContent = (outputArea.value.length / val.length).toFixed(2) + "x"
+        } else {
+          ratioEl.textContent = "\u2014"
+        }
       }
 
-      inputLen.textContent = val.length;
-      outputLen.textContent = outputArea.value.length;
-      if (val.length > 0 && outputArea.value.length > 0) {
-        ratioEl.textContent = (outputArea.value.length / val.length).toFixed(2) + "x";
-      } else {
-        ratioEl.textContent = "\u2014";
-      }
-    }
+      encodeBtn.addEventListener("click", () => setMode("encode"))
+      decodeBtn.addEventListener("click", () => setMode("decode"))
+      inputArea.addEventListener("input", convert)
 
-    encodeBtn.addEventListener("click", () => setMode("encode"));
-    decodeBtn.addEventListener("click", () => setMode("decode"));
-    inputArea.addEventListener("input", convert);
-
-    copyBtn.addEventListener("click", () => {
-      const text = outputArea.value;
-      if (!text) return;
-      navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = "Copied!";
-        copyBtn.classList.add("copied");
-        setTimeout(() => { copyBtn.textContent = "Copy"; copyBtn.classList.remove("copied"); }, 1500);
-      });
-    });
-  </script>
-</body>
+      copyBtn.addEventListener("click", () => {
+        const text = outputArea.value
+        if (!text) return
+        navigator.clipboard.writeText(text).then(() => {
+          copyBtn.textContent = "Copied!"
+          copyBtn.classList.add("copied")
+          setTimeout(() => {
+            copyBtn.textContent = "Copy"
+            copyBtn.classList.remove("copied")
+          }, 1500)
+        })
+      })
+    </script>
+  </body>
 </html>

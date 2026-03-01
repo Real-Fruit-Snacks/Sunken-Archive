@@ -15,7 +15,7 @@ This note exercises every rendering feature supported by the Sunken Archive. Use
 
 ## Text Formatting
 
-Regular text, **bold text**, *italic text*, ***bold italic***, ~~strikethrough~~, and ==highlighted text==.
+Regular text, **bold text**, _italic text_, **_bold italic_**, ~~strikethrough~~, and ==highlighted text==.
 
 Inline `code` looks like this. A `<Variable>` placeholder should render in red.
 
@@ -37,6 +37,7 @@ Arrows convert automatically: -> => <- <=>
 Quartz uses rehype for HTML processing[^1]. The site is built with Obsidian-flavored markdown[^2].
 
 [^1]: rehype is a tool for transforming HTML with plugins.
+
 [^2]: OFM extends standard markdown with features like wikilinks, callouts, and embeds.
 
 ## Block Reference
@@ -46,6 +47,7 @@ This paragraph has a block ID for referencing. ^showcase-block
 ## Lists
 
 ### Unordered
+
 - First item
 - Second item
   - Nested item
@@ -53,11 +55,13 @@ This paragraph has a block ID for referencing. ^showcase-block
 - Third item
 
 ### Ordered
+
 1. Step one
 2. Step two
 3. Step three
 
 ### Task List
+
 - [x] Completed task
 - [x] Another completed task
 - [ ] Pending task
@@ -65,25 +69,27 @@ This paragraph has a block ID for referencing. ^showcase-block
 
 ## Tables
 
-| Feature | Status | Notes |
-|---------|--------|-------|
+| Feature   | Status  | Notes                        |
+| --------- | ------- | ---------------------------- |
 | Wikilinks | Working | Supports aliases and anchors |
-| Callouts | Working | All types rendered |
-| Mermaid | Working | Flowchart, sequence, etc. |
-| LaTeX | Working | KaTeX renderer |
+| Callouts  | Working | All types rendered           |
+| Mermaid   | Working | Flowchart, sequence, etc.    |
+| LaTeX     | Working | KaTeX renderer               |
 
 ## Code Blocks
 
 ### JavaScript
+
 ```javascript
 function connect(config) {
-  const url = `https://<APIHost>:<Port>/v1`;
-  const token = config.get("<APIKey>");
-  return fetch(url, { headers: { Authorization: token } });
+  const url = `https://<APIHost>:<Port>/v1`
+  const token = config.get("<APIKey>")
+  return fetch(url, { headers: { Authorization: token } })
 }
 ```
 
 ### Python
+
 ```python
 def deploy(server: str, port: int) -> None:
     """Deploy to <ServerName> on <Port>."""
@@ -93,6 +99,7 @@ def deploy(server: str, port: int) -> None:
 ```
 
 ### Bash
+
 ```bash
 #!/bin/bash
 ssh <Username>@<ServerIP> -p <SSHPort> << 'EOF'
@@ -102,6 +109,7 @@ EOF
 ```
 
 ### YAML
+
 ```yaml
 services:
   app:
@@ -114,6 +122,7 @@ services:
 ```
 
 ### Diff
+
 ```diff
 - const oldValue = "remove this";
 + const newValue = "add this instead";
@@ -164,6 +173,7 @@ services:
 
 > [!tip]+ Expanded by Default
 > This callout starts open. Click to collapse.
+>
 > - Item one
 > - Item two
 
@@ -190,6 +200,7 @@ $$
 ## Mermaid Diagrams
 
 ### Flowchart
+
 ```mermaid
 flowchart TD
     A[Markdown Files] --> B[Remark Parser]
@@ -199,6 +210,7 @@ flowchart TD
 ```
 
 ### Sequence Diagram
+
 ```mermaid
 sequenceDiagram
     participant U as User

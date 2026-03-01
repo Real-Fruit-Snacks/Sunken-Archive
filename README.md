@@ -91,10 +91,10 @@ Author content in Obsidian with full support for callouts, wikilinks, tags, LaTe
 
 ### Prerequisites
 
-| Requirement | Version | Notes                |
-|-------------|---------|----------------------|
-| Node.js     | 22+     | See `.node-version`  |
-| npm         | 10.9+   | Bundled with Node    |
+| Requirement | Version | Notes               |
+| ----------- | ------- | ------------------- |
+| Node.js     | 22+     | See `.node-version` |
+| npm         | 10.9+   | Bundled with Node   |
 
 ### Install & Run
 
@@ -145,14 +145,14 @@ npm run format               # Auto-format with Prettier
 
 ## Content
 
-| Section        | Description                                                  |
-|----------------|--------------------------------------------------------------|
-| **Concepts**   | Docker, networking, and technical reference material         |
-| **Daily**      | Date-stamped journal entries and daily logs                   |
-| **Meta**       | Site documentation, feature showcase, workflow notes          |
-| **Projects**   | Home lab, web development, and ongoing project documentation  |
-| **Resources**  | Curated bookmarks and external references                    |
-| **Tools**      | Interactive browser-based utilities (subnet calc, regex, etc) |
+| Section       | Description                                                   |
+| ------------- | ------------------------------------------------------------- |
+| **Concepts**  | Docker, networking, and technical reference material          |
+| **Daily**     | Date-stamped journal entries and daily logs                   |
+| **Meta**      | Site documentation, feature showcase, workflow notes          |
+| **Projects**  | Home lab, web development, and ongoing project documentation  |
+| **Resources** | Curated bookmarks and external references                     |
+| **Tools**     | Interactive browser-based utilities (subnet calc, regex, etc) |
 
 ---
 
@@ -160,22 +160,22 @@ npm run format               # Auto-format with Prettier
 
 This fork of Quartz includes the following modifications:
 
-| Feature               | Description                                           |
-|-----------------------|-------------------------------------------------------|
-| **SVG Favicon**       | Custom anchor favicon from SVG source                 |
-| **Robots.txt**        | Emitter plugin for search engine directives           |
-| **Variable Injection**| Transformer plugin for `{{date}}` and `{{title}}`     |
-| **Dark Mode Only**    | Light mode disabled; both themes use Catppuccin Mocha |
-| **Custom OG Images**  | Social preview images matching the site theme         |
+| Feature                | Description                                           |
+| ---------------------- | ----------------------------------------------------- |
+| **SVG Favicon**        | Custom anchor favicon from SVG source                 |
+| **Robots.txt**         | Emitter plugin for search engine directives           |
+| **Variable Injection** | Transformer plugin for `{{date}}` and `{{title}}`     |
+| **Dark Mode Only**     | Light mode disabled; both themes use Catppuccin Mocha |
+| **Custom OG Images**   | Social preview images matching the site theme         |
 
 ---
 
 ## Deployment
 
-The site deploys to GitHub Pages via a GitHub Actions workflow on push to `v4`.
+The site deploys to GitHub Pages via a GitHub Actions workflow on push to `main`.
 
 ```
-push to v4 → npm ci → quartz build → deploy to GitHub Pages
+push to main → npm ci → quartz build → deploy to GitHub Pages
 ```
 
 Live at: **https://real-fruit-snacks.github.io/Sunken-Archive**

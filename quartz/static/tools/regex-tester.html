@@ -1,199 +1,374 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Regex Tester — Sunken Archive</title>
-  <style>
-    :root {
-      --base: #1e1e2e; --mantle: #181825; --surface0: #313244; --surface1: #45475a;
-      --overlay0: #6c7086; --text: #cdd6f4; --subtext0: #a6adc8;
-      --peach: #fab387; --green: #a6e3a1; --blue: #89b4fa; --red: #f38ba8;
-      --yellow: #f9e2af; --mauve: #cba6f7;
-      --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "IBM Plex Mono", "Fira Code", monospace;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--base); color: var(--text); font-family: var(--font); padding: 0.5rem 0; display: flex; justify-content: center; }
-    .container { max-width: 720px; width: 100%; }
-
-    .regex-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: stretch; }
-    .regex-row input {
-      flex: 1; padding: 0.75rem 1rem; font-size: 1rem; font-family: var(--font-mono);
-      background: var(--surface0); border: 2px solid var(--surface1); border-radius: 8px; color: var(--text); outline: none;
-    }
-    .regex-row input:focus { border-color: var(--peach); }
-    .regex-row input::placeholder { color: var(--overlay0); }
-    .regex-row input.error { border-color: var(--red); }
-
-    .flags { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-    .flag-btn {
-      background: var(--surface0); border: 2px solid var(--surface1); color: var(--subtext0);
-      padding: 0.3rem 0.7rem; border-radius: 5px; cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem;
-    }
-    .flag-btn:hover { color: var(--text); }
-    .flag-btn.active { border-color: var(--peach); color: var(--peach); }
-
-    .section-label { font-size: 0.75rem; color: var(--subtext0); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
-
-    .test-input {
-      width: 100%; min-height: 100px; padding: 0.75rem 1rem; font-size: 0.95rem; font-family: var(--font-mono);
-      background: var(--surface0); border: 2px solid var(--surface1); border-radius: 8px; color: var(--text);
-      outline: none; resize: vertical; margin-bottom: 1rem;
-    }
-    .test-input:focus { border-color: var(--peach); }
-    .test-input::placeholder { color: var(--overlay0); }
-
-    .results-area { background: var(--mantle); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
-    .match-output {
-      font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.8; white-space: pre-wrap; word-break: break-all;
-    }
-    .match-hl { background: rgba(250, 179, 135, 0.25); color: var(--peach); border-radius: 3px; padding: 0.05rem 0.1rem; }
-    .match-hl-alt { background: rgba(137, 180, 250, 0.25); color: var(--blue); border-radius: 3px; padding: 0.05rem 0.1rem; }
-
-    .match-info { display: flex; gap: 1.5rem; margin-bottom: 1rem; }
-    .match-stat { font-size: 0.85rem; color: var(--subtext0); }
-    .match-stat span { color: var(--peach); font-family: var(--font-mono); font-weight: 600; }
-
-    .groups-section { background: var(--mantle); border-radius: 8px; padding: 1rem; }
-    .group-item {
-      display: flex; gap: 0.75rem; padding: 0.35rem 0; border-bottom: 1px solid var(--surface0);
-      font-size: 0.85rem;
-    }
-    .group-item:last-child { border-bottom: none; }
-    .group-label { color: var(--subtext0); min-width: 80px; }
-    .group-value { font-family: var(--font-mono); color: var(--green); }
-
-    .error-msg { color: var(--red); font-size: 0.85rem; margin-bottom: 0.75rem; }
-    .empty-state { color: var(--overlay0); font-style: italic; text-align: center; padding: 1rem; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <a href="/Sunken-Archive/" style="display:inline-block;margin-bottom:1rem;color:var(--peach);text-decoration:none;font-size:0.9rem;">← Sunken Archive</a>
-    <div class="regex-row">
-      <input type="text" id="regexInput" placeholder="Enter regex pattern..." autofocus>
-    </div>
-
-    <div class="flags">
-      <button class="flag-btn active" data-flag="g">g <span style="color:var(--overlay0)">global</span></button>
-      <button class="flag-btn" data-flag="i">i <span style="color:var(--overlay0)">case-insensitive</span></button>
-      <button class="flag-btn active" data-flag="m">m <span style="color:var(--overlay0)">multiline</span></button>
-      <button class="flag-btn" data-flag="s">s <span style="color:var(--overlay0)">dotAll</span></button>
-    </div>
-
-    <div class="section-label">Test String</div>
-    <textarea class="test-input" id="testInput" placeholder="Enter test string..."></textarea>
-
-    <div class="error-msg" id="errorMsg"></div>
-
-    <div class="match-info">
-      <div class="match-stat">Matches: <span id="matchCount">0</span></div>
-      <div class="match-stat">Groups: <span id="groupCount">0</span></div>
-    </div>
-
-    <div class="section-label">Highlighted Matches</div>
-    <div class="results-area">
-      <div class="match-output" id="matchOutput"><span class="empty-state">Enter a pattern and test string</span></div>
-    </div>
-
-    <div class="section-label">Capture Groups</div>
-    <div class="groups-section" id="groupsSection">
-      <div class="empty-state">No capture groups</div>
-    </div>
-  </div>
-
-  <script>
-    const regexInput = document.getElementById("regexInput");
-    const testInput = document.getElementById("testInput");
-    const matchOutput = document.getElementById("matchOutput");
-    const errorMsg = document.getElementById("errorMsg");
-    const matchCount = document.getElementById("matchCount");
-    const groupCount = document.getElementById("groupCount");
-    const groupsSection = document.getElementById("groupsSection");
-
-    const activeFlags = new Set(["g", "m"]);
-
-    document.querySelectorAll(".flag-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const f = btn.dataset.flag;
-        if (activeFlags.has(f)) { activeFlags.delete(f); btn.classList.remove("active"); }
-        else { activeFlags.add(f); btn.classList.add("active"); }
-        run();
-      });
-    });
-
-    function escapeHtml(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
-    function run() {
-      const pattern = regexInput.value;
-      const test = testInput.value;
-      errorMsg.textContent = "";
-      regexInput.classList.remove("error");
-
-      if (!pattern || !test) {
-        matchOutput.innerHTML = '<span class="empty-state">Enter a pattern and test string</span>';
-        matchCount.textContent = "0"; groupCount.textContent = "0";
-        groupsSection.innerHTML = '<div class="empty-state">No capture groups</div>';
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Regex Tester — Sunken Archive</title>
+    <style>
+      :root {
+        --base: #1e1e2e;
+        --mantle: #181825;
+        --surface0: #313244;
+        --surface1: #45475a;
+        --overlay0: #6c7086;
+        --text: #cdd6f4;
+        --subtext0: #a6adc8;
+        --peach: #fab387;
+        --green: #a6e3a1;
+        --blue: #89b4fa;
+        --red: #f38ba8;
+        --yellow: #f9e2af;
+        --mauve: #cba6f7;
+        --font: "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-mono: "IBM Plex Mono", "Fira Code", monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--base);
+        color: var(--text);
+        font-family: var(--font);
+        padding: 0.5rem 0;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        max-width: 720px;
+        width: 100%;
       }
 
-      let regex;
-      try {
-        const flags = [...activeFlags].sort().join("");
-        regex = new RegExp(pattern, flags);
-      } catch (e) {
-        errorMsg.textContent = e.message;
-        regexInput.classList.add("error");
-        matchOutput.innerHTML = '<span class="empty-state">Invalid pattern</span>';
-        matchCount.textContent = "0"; groupCount.textContent = "0";
-        return;
+      .regex-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        align-items: stretch;
+      }
+      .regex-row input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-family: var(--font-mono);
+        background: var(--surface0);
+        border: 2px solid var(--surface1);
+        border-radius: 8px;
+        color: var(--text);
+        outline: none;
+      }
+      .regex-row input:focus {
+        border-color: var(--peach);
+      }
+      .regex-row input::placeholder {
+        color: var(--overlay0);
+      }
+      .regex-row input.error {
+        border-color: var(--red);
       }
 
-      const matches = [];
-      let match;
-      if (activeFlags.has("g")) {
-        while ((match = regex.exec(test)) !== null) {
-          matches.push({ index: match.index, length: match[0].length, groups: [...match].slice(1), value: match[0] });
-          if (match[0].length === 0) regex.lastIndex++;
+      .flags {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .flag-btn {
+        background: var(--surface0);
+        border: 2px solid var(--surface1);
+        color: var(--subtext0);
+        padding: 0.3rem 0.7rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+      }
+      .flag-btn:hover {
+        color: var(--text);
+      }
+      .flag-btn.active {
+        border-color: var(--peach);
+        color: var(--peach);
+      }
+
+      .section-label {
+        font-size: 0.75rem;
+        color: var(--subtext0);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.35rem;
+      }
+
+      .test-input {
+        width: 100%;
+        min-height: 100px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        font-family: var(--font-mono);
+        background: var(--surface0);
+        border: 2px solid var(--surface1);
+        border-radius: 8px;
+        color: var(--text);
+        outline: none;
+        resize: vertical;
+        margin-bottom: 1rem;
+      }
+      .test-input:focus {
+        border-color: var(--peach);
+      }
+      .test-input::placeholder {
+        color: var(--overlay0);
+      }
+
+      .results-area {
+        background: var(--mantle);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      .match-output {
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .match-hl {
+        background: rgba(250, 179, 135, 0.25);
+        color: var(--peach);
+        border-radius: 3px;
+        padding: 0.05rem 0.1rem;
+      }
+      .match-hl-alt {
+        background: rgba(137, 180, 250, 0.25);
+        color: var(--blue);
+        border-radius: 3px;
+        padding: 0.05rem 0.1rem;
+      }
+
+      .match-info {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .match-stat {
+        font-size: 0.85rem;
+        color: var(--subtext0);
+      }
+      .match-stat span {
+        color: var(--peach);
+        font-family: var(--font-mono);
+        font-weight: 600;
+      }
+
+      .groups-section {
+        background: var(--mantle);
+        border-radius: 8px;
+        padding: 1rem;
+      }
+      .group-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.35rem 0;
+        border-bottom: 1px solid var(--surface0);
+        font-size: 0.85rem;
+      }
+      .group-item:last-child {
+        border-bottom: none;
+      }
+      .group-label {
+        color: var(--subtext0);
+        min-width: 80px;
+      }
+      .group-value {
+        font-family: var(--font-mono);
+        color: var(--green);
+      }
+
+      .error-msg {
+        color: var(--red);
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+      }
+      .empty-state {
+        color: var(--overlay0);
+        font-style: italic;
+        text-align: center;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a
+        href="/Sunken-Archive/"
+        style="
+          display: inline-block;
+          margin-bottom: 1rem;
+          color: var(--peach);
+          text-decoration: none;
+          font-size: 0.9rem;
+        "
+        >← Sunken Archive</a
+      >
+      <div class="regex-row">
+        <input type="text" id="regexInput" placeholder="Enter regex pattern..." autofocus />
+      </div>
+
+      <div class="flags">
+        <button class="flag-btn active" data-flag="g">
+          g <span style="color: var(--overlay0)">global</span>
+        </button>
+        <button class="flag-btn" data-flag="i">
+          i <span style="color: var(--overlay0)">case-insensitive</span>
+        </button>
+        <button class="flag-btn active" data-flag="m">
+          m <span style="color: var(--overlay0)">multiline</span>
+        </button>
+        <button class="flag-btn" data-flag="s">
+          s <span style="color: var(--overlay0)">dotAll</span>
+        </button>
+      </div>
+
+      <div class="section-label">Test String</div>
+      <textarea class="test-input" id="testInput" placeholder="Enter test string..."></textarea>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="match-info">
+        <div class="match-stat">Matches: <span id="matchCount">0</span></div>
+        <div class="match-stat">Groups: <span id="groupCount">0</span></div>
+      </div>
+
+      <div class="section-label">Highlighted Matches</div>
+      <div class="results-area">
+        <div class="match-output" id="matchOutput">
+          <span class="empty-state">Enter a pattern and test string</span>
+        </div>
+      </div>
+
+      <div class="section-label">Capture Groups</div>
+      <div class="groups-section" id="groupsSection">
+        <div class="empty-state">No capture groups</div>
+      </div>
+    </div>
+
+    <script>
+      const regexInput = document.getElementById("regexInput")
+      const testInput = document.getElementById("testInput")
+      const matchOutput = document.getElementById("matchOutput")
+      const errorMsg = document.getElementById("errorMsg")
+      const matchCount = document.getElementById("matchCount")
+      const groupCount = document.getElementById("groupCount")
+      const groupsSection = document.getElementById("groupsSection")
+
+      const activeFlags = new Set(["g", "m"])
+
+      document.querySelectorAll(".flag-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const f = btn.dataset.flag
+          if (activeFlags.has(f)) {
+            activeFlags.delete(f)
+            btn.classList.remove("active")
+          } else {
+            activeFlags.add(f)
+            btn.classList.add("active")
+          }
+          run()
+        })
+      })
+
+      function escapeHtml(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      }
+
+      function run() {
+        const pattern = regexInput.value
+        const test = testInput.value
+        errorMsg.textContent = ""
+        regexInput.classList.remove("error")
+
+        if (!pattern || !test) {
+          matchOutput.innerHTML = '<span class="empty-state">Enter a pattern and test string</span>'
+          matchCount.textContent = "0"
+          groupCount.textContent = "0"
+          groupsSection.innerHTML = '<div class="empty-state">No capture groups</div>'
+          return
         }
-      } else {
-        match = regex.exec(test);
-        if (match) matches.push({ index: match.index, length: match[0].length, groups: [...match].slice(1), value: match[0] });
+
+        let regex
+        try {
+          const flags = [...activeFlags].sort().join("")
+          regex = new RegExp(pattern, flags)
+        } catch (e) {
+          errorMsg.textContent = e.message
+          regexInput.classList.add("error")
+          matchOutput.innerHTML = '<span class="empty-state">Invalid pattern</span>'
+          matchCount.textContent = "0"
+          groupCount.textContent = "0"
+          return
+        }
+
+        const matches = []
+        let match
+        if (activeFlags.has("g")) {
+          while ((match = regex.exec(test)) !== null) {
+            matches.push({
+              index: match.index,
+              length: match[0].length,
+              groups: [...match].slice(1),
+              value: match[0],
+            })
+            if (match[0].length === 0) regex.lastIndex++
+          }
+        } else {
+          match = regex.exec(test)
+          if (match)
+            matches.push({
+              index: match.index,
+              length: match[0].length,
+              groups: [...match].slice(1),
+              value: match[0],
+            })
+        }
+
+        matchCount.textContent = matches.length
+
+        // Highlight matches
+        if (matches.length === 0) {
+          matchOutput.innerHTML = escapeHtml(test)
+        } else {
+          let html = ""
+          let lastEnd = 0
+          matches.forEach((m, i) => {
+            html += escapeHtml(test.slice(lastEnd, m.index))
+            const cls = i % 2 === 0 ? "match-hl" : "match-hl-alt"
+            html += `<span class="${cls}">${escapeHtml(m.value)}</span>`
+            lastEnd = m.index + m.length
+          })
+          html += escapeHtml(test.slice(lastEnd))
+          matchOutput.innerHTML = html
+        }
+
+        // Capture groups
+        const allGroups = matches.flatMap((m, mi) =>
+          m.groups.map((g, gi) => ({ match: mi + 1, group: gi + 1, value: g })),
+        )
+        groupCount.textContent = allGroups.length
+
+        if (allGroups.length === 0) {
+          groupsSection.innerHTML = '<div class="empty-state">No capture groups</div>'
+        } else {
+          groupsSection.innerHTML = allGroups
+            .map(
+              (g) =>
+                `<div class="group-item"><span class="group-label">Match ${g.match}, Group ${g.group}</span><span class="group-value">${g.value !== undefined ? escapeHtml(g.value) : "(undefined)"}</span></div>`,
+            )
+            .join("")
+        }
       }
 
-      matchCount.textContent = matches.length;
-
-      // Highlight matches
-      if (matches.length === 0) {
-        matchOutput.innerHTML = escapeHtml(test);
-      } else {
-        let html = ""; let lastEnd = 0;
-        matches.forEach((m, i) => {
-          html += escapeHtml(test.slice(lastEnd, m.index));
-          const cls = i % 2 === 0 ? "match-hl" : "match-hl-alt";
-          html += `<span class="${cls}">${escapeHtml(m.value)}</span>`;
-          lastEnd = m.index + m.length;
-        });
-        html += escapeHtml(test.slice(lastEnd));
-        matchOutput.innerHTML = html;
-      }
-
-      // Capture groups
-      const allGroups = matches.flatMap((m, mi) => m.groups.map((g, gi) => ({ match: mi + 1, group: gi + 1, value: g })));
-      groupCount.textContent = allGroups.length;
-
-      if (allGroups.length === 0) {
-        groupsSection.innerHTML = '<div class="empty-state">No capture groups</div>';
-      } else {
-        groupsSection.innerHTML = allGroups.map(g =>
-          `<div class="group-item"><span class="group-label">Match ${g.match}, Group ${g.group}</span><span class="group-value">${g.value !== undefined ? escapeHtml(g.value) : '(undefined)'}</span></div>`
-        ).join("");
-      }
-    }
-
-    regexInput.addEventListener("input", run);
-    testInput.addEventListener("input", run);
-  </script>
-</body>
+      regexInput.addEventListener("input", run)
+      testInput.addEventListener("input", run)
+    </script>
+  </body>
 </html>

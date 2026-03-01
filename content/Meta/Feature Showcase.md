@@ -5,6 +5,7 @@ tags:
   - test
 date: 2026-02-28
 description: A comprehensive test of all Quartz rendering features.
+combined-code: true
 ---
 
 # Feature Showcase

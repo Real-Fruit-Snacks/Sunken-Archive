@@ -160,13 +160,14 @@ npm run format               # Auto-format with Prettier
 
 This fork of Quartz includes the following modifications:
 
-| Feature                | Description                                           |
-| ---------------------- | ----------------------------------------------------- |
-| **SVG Favicon**        | Custom anchor favicon from SVG source                 |
-| **Robots.txt**         | Emitter plugin for search engine directives           |
-| **Variable Injection** | Transformer plugin for `{{date}}` and `{{title}}`     |
-| **Dark Mode Only**     | Light mode disabled; both themes use Catppuccin Mocha |
-| **Custom OG Images**   | Social preview images matching the site theme         |
+| Feature                   | Description                                                      |
+| ------------------------- | ---------------------------------------------------------------- |
+| **SVG Favicon**           | Custom anchor favicon generated from SVG via Sharp               |
+| **Robots.txt**            | Emitter plugin for search engine directives and sitemap          |
+| **Variable Highlighting** | Wraps `<Variable>` placeholders in styled spans (prose and code) |
+| **Combined Code**         | Merges all code blocks on a page into a single copyable block    |
+| **Dark Mode Only**        | Light mode disabled; both themes use Catppuccin Mocha            |
+| **Custom OG Images**      | Social preview images matching the site theme                    |
 
 ---
 

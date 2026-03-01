@@ -15,7 +15,7 @@ export const Robots: QuartzEmitterPlugin = () => ({
     ].join("\n")
 
     yield write({
-      ctx: { argv, cfg } as Parameters<typeof write>[0]["ctx"],
+      ctx: { argv },
       content,
       slug: "robots" as FullSlug,
       ext: ".txt",

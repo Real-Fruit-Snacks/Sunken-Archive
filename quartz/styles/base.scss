@@ -29,16 +29,6 @@ body {
   border-radius: 5px;
 }
 
-.variable {
-  color: #f38ba8;
-  font-family: var(--codeFont);
-  font-size: 0.9em;
-}
-
-// Override Shiki syntax colors for variable highlights inside code blocks
-code span.variable {
-  color: #f38ba8 !important;
-}
 ::selection {
   background: color-mix(in srgb, var(--tertiary) 60%, rgba(255, 255, 255, 0));
   color: var(--darkgray);
@@ -46,13 +36,12 @@ code span.variable {
 
 p,
 ul,
-text,
+text, // SVG <text> elements
 a,
 tr,
 td,
 li,
 ol,
-ul,
 .katex,
 .math,
 .typst-doc,
@@ -519,20 +508,6 @@ code {
   border-radius: 5px;
   padding: 0.1rem 0.2rem;
   background: var(--lightgray);
-}
-
-.combined-code-section {
-  margin-top: 2rem;
-
-  > hr {
-    margin-bottom: 1rem;
-  }
-
-  > pre.combined-code-block > code {
-    display: block;
-    white-space: pre;
-    counter-reset: none;
-  }
 }
 
 tbody,

@@ -1,28 +1,29 @@
 import { QuartzTransformerPlugin } from "../types"
 import { visit } from "unist-util-visit"
-import { Element, Text, ElementContent } from "hast"
+import { Element, Text, ElementContent, Root } from "hast"
 
-const VARIABLE_RE = /<([A-Za-z][A-Za-z0-9_-]*)>/
+const VARIABLE_RE = /<([A-Za-z][A-Za-z0-9_-]*)>/g
 
 export const HighlightVariables: QuartzTransformerPlugin = () => {
   return {
     name: "HighlightVariables",
     textTransform(_ctx, src) {
       // Handle <Variable> in prose text (outside code blocks and inline code)
+      // Note: does not handle nested fenced code blocks with differing backtick counts
       const codeBlockRegex = /(`{3,}[\s\S]*?`{3,}|`[^`]*`)/g
       const parts = src.split(codeBlockRegex)
 
       return parts
         .map((part, i) => {
           if (i % 2 === 1) return part
-          return part.replace(VARIABLE_RE, '<span class="variable">&lt;$1&gt;</span>')
+          return part.replaceAll(VARIABLE_RE, '<span class="variable">&lt;$1&gt;</span>')
         })
         .join("")
     },
     htmlPlugins() {
       // Handle <Variable> inside code blocks (runs after Shiki syntax highlighting)
       return [
-        () => (tree: any) => {
+        () => (tree: Root) => {
           visit(tree, "element", (node: Element) => {
             if (node.tagName !== "code") return
             // Recursively process all text nodes under this code element
@@ -66,7 +67,7 @@ function splitVariables(text: string): (Element | Text)[] {
   let lastIndex = 0
   let match: RegExpExecArray | null
 
-  const re = new RegExp(VARIABLE_RE.source, "g")
+  const re = new RegExp(VARIABLE_RE.source, VARIABLE_RE.flags)
   while ((match = re.exec(text)) !== null) {
     if (match.index > lastIndex) {
       parts.push({ type: "text", value: text.slice(lastIndex, match.index) })

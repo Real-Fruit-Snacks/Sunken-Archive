@@ -33,8 +33,13 @@ AGENTS.md
 .codeium/
 .continue/
 .augment/
+.codex/
 *.prompt
 
 # Replit
 .replit
 replit.nix
+
+# Logs
+*.log
+npm-debug.log*

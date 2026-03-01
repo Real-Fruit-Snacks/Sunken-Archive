@@ -8,9 +8,15 @@ document.addEventListener("nav", () => {
   for (let i = 0; i < els.length; i++) {
     const codeBlock = els[i].getElementsByTagName("code")[0]
     if (codeBlock) {
-      const source = (
-        codeBlock.dataset.clipboard ? JSON.parse(codeBlock.dataset.clipboard) : codeBlock.innerText
-      ).replace(/\n\n/g, "\n")
+      let source: string
+      try {
+        source = codeBlock.dataset.clipboard
+          ? JSON.parse(codeBlock.dataset.clipboard)
+          : codeBlock.innerText
+      } catch {
+        source = codeBlock.innerText
+      }
+      source = source.replace(/\n+$/, "")
       const button = document.createElement("button")
       button.className = "clipboard-button"
       button.type = "button"

@@ -122,6 +122,9 @@
         font-size: 0.9rem;
       }
 
+      .perm-table .role-special td:first-child {
+        color: var(--yellow);
+      }
       .perm-table .role-owner td:first-child {
         color: var(--peach);
       }
@@ -166,6 +169,9 @@
         font-family: var(--font-mono);
         font-size: 1.1rem;
         font-weight: 600;
+      }
+      .role-special .octal-cell {
+        color: var(--yellow);
       }
       .role-owner .octal-cell {
         color: var(--peach);
@@ -220,7 +226,7 @@
     <div class="container">
       <div class="numeric-input">
         <label>Octal:</label>
-        <input type="text" id="octalInput" maxlength="4" value="755" autofocus />
+        <input type="text" id="octalInput" maxlength="4" value="0755" autofocus />
       </div>
 
       <div class="output-row">
@@ -249,6 +255,55 @@
           </tr>
         </thead>
         <tbody>
+          <tr class="role-special">
+            <td>Special</td>
+            <td>
+              <div class="check-wrap">
+                <input type="checkbox" data-role="special" data-perm="read" />
+              </div>
+              <div
+                style="
+                  font-size: 0.65rem;
+                  color: var(--overlay0);
+                  text-align: center;
+                  margin-top: 0.2rem;
+                "
+              >
+                setuid
+              </div>
+            </td>
+            <td>
+              <div class="check-wrap">
+                <input type="checkbox" data-role="special" data-perm="write" />
+              </div>
+              <div
+                style="
+                  font-size: 0.65rem;
+                  color: var(--overlay0);
+                  text-align: center;
+                  margin-top: 0.2rem;
+                "
+              >
+                setgid
+              </div>
+            </td>
+            <td>
+              <div class="check-wrap">
+                <input type="checkbox" data-role="special" data-perm="exec" />
+              </div>
+              <div
+                style="
+                  font-size: 0.65rem;
+                  color: var(--overlay0);
+                  text-align: center;
+                  margin-top: 0.2rem;
+                "
+              >
+                sticky
+              </div>
+            </td>
+            <td class="octal-cell" id="specialOctal">0</td>
+          </tr>
           <tr class="role-owner">
             <td>Owner</td>
             <td>
@@ -320,6 +375,9 @@
           <div class="preset-chip" data-val="644">644 <span>Standard file</span></div>
           <div class="preset-chip" data-val="600">600 <span>Private file</span></div>
           <div class="preset-chip" data-val="400">400 <span>Read-only</span></div>
+          <div class="preset-chip" data-val="4755">4755 <span>Setuid</span></div>
+          <div class="preset-chip" data-val="2755">2755 <span>Setgid</span></div>
+          <div class="preset-chip" data-val="1777">1777 <span>Sticky /tmp</span></div>
         </div>
       </div>
     </div>
@@ -337,29 +395,51 @@
         return val
       }
 
-      function toSymbolic(o, g, oth) {
-        const s = (v, r, w, x) => (v & 4 ? r : "-") + (v & 2 ? w : "-") + (v & 1 ? x : "-")
-        return s(o, "r", "w", "x") + s(g, "r", "w", "x") + s(oth, "r", "w", "x")
+      function toSymbolic(sp, o, g, oth) {
+        // Owner execute: 's' (setuid+exec), 'S' (setuid only), 'x', '-'
+        const oe = sp & 4 ? (o & 1 ? "s" : "S") : o & 1 ? "x" : "-"
+        // Group execute: 's' (setgid+exec), 'S' (setgid only), 'x', '-'
+        const ge = sp & 2 ? (g & 1 ? "s" : "S") : g & 1 ? "x" : "-"
+        // Other execute: 't' (sticky+exec), 'T' (sticky only), 'x', '-'
+        const oe2 = sp & 1 ? (oth & 1 ? "t" : "T") : oth & 1 ? "x" : "-"
+        return (
+          (o & 4 ? "r" : "-") +
+          (o & 2 ? "w" : "-") +
+          oe +
+          (g & 4 ? "r" : "-") +
+          (g & 2 ? "w" : "-") +
+          ge +
+          (oth & 4 ? "r" : "-") +
+          (oth & 2 ? "w" : "-") +
+          oe2
+        )
       }
 
       function updateFromCheckboxes() {
-        const o = getOctalForRole("owner"),
+        const sp = getOctalForRole("special"),
+          o = getOctalForRole("owner"),
           g = getOctalForRole("group"),
           oth = getOctalForRole("other")
+        document.getElementById("specialOctal").textContent = sp
         document.getElementById("ownerOctal").textContent = o
         document.getElementById("groupOctal").textContent = g
         document.getElementById("otherOctal").textContent = oth
-        const num = "" + o + g + oth
+        const num = sp > 0 ? "" + sp + o + g + oth : "" + o + g + oth
         octalInput.value = num
         document.getElementById("numericOut").textContent = num
-        document.getElementById("symbolicOut").textContent = toSymbolic(o, g, oth)
+        document.getElementById("symbolicOut").textContent = toSymbolic(sp, o, g, oth)
         document.getElementById("commandOut").textContent = "chmod " + num + " file"
       }
 
       function setFromOctal(str) {
-        const digits = str.padStart(3, "0").slice(-3)
-        const vals = [parseInt(digits[0]) || 0, parseInt(digits[1]) || 0, parseInt(digits[2]) || 0]
-        const roles = ["owner", "group", "other"]
+        const padded = str.padStart(4, "0").slice(-4)
+        const vals = [
+          parseInt(padded[0]) || 0,
+          parseInt(padded[1]) || 0,
+          parseInt(padded[2]) || 0,
+          parseInt(padded[3]) || 0,
+        ]
+        const roles = ["special", "owner", "group", "other"]
         roles.forEach((role, i) => {
           checks.forEach((cb) => {
             if (cb.dataset.role === role) cb.checked = !!(vals[i] & permMap[cb.dataset.perm])
@@ -371,7 +451,7 @@
       checks.forEach((cb) => cb.addEventListener("change", updateFromCheckboxes))
 
       octalInput.addEventListener("input", () => {
-        const v = octalInput.value.replace(/[^0-7]/g, "").slice(0, 3)
+        const v = octalInput.value.replace(/[^0-7]/g, "").slice(0, 4)
         if (v.length > 0) setFromOctal(v)
       })
 

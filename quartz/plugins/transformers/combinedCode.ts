@@ -3,32 +3,6 @@ import { visit } from "unist-util-visit"
 import { toString } from "hast-util-to-string"
 import { Element, Root } from "hast"
 
-const HASH_COMMENT = new Set([
-  "bash",
-  "sh",
-  "zsh",
-  "python",
-  "ruby",
-  "perl",
-  "r",
-  "yaml",
-  "yml",
-  "toml",
-  "makefile",
-  "dockerfile",
-  "powershell",
-  "pwsh",
-])
-
-const MARKUP_COMMENT = new Set(["html", "xml", "svg", "markdown", "md"])
-
-function langComment(lang: string, label: string): string {
-  const l = lang.toLowerCase()
-  if (HASH_COMMENT.has(l)) return `# --- ${label} ---`
-  if (MARKUP_COMMENT.has(l)) return `<!-- --- ${label} --- -->`
-  return `// --- ${label} ---`
-}
-
 export const CombinedCode: QuartzTransformerPlugin = () => {
   return {
     name: "CombinedCode",
@@ -64,12 +38,7 @@ export const CombinedCode: QuartzTransformerPlugin = () => {
 
           if (blocks.length < 2) return
 
-          const combined = blocks
-            .map((b) => {
-              const header = langComment(b.lang, b.lang || "code")
-              return `${header}\n${b.text}`
-            })
-            .join("\n\n")
+          const combined = blocks.map((b) => b.text).join("\n\n")
 
           const section: Element = {
             type: "element",

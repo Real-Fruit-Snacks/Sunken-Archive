@@ -27,7 +27,7 @@ Notes, projects, tools, and references — organized and published as a searchab
 - [Project Structure](#project-structure)
 - [Content](#content)
 - [Customizations](#customizations)
-- [Vendor Assets (Air-Gap)](#vendor-assets-air-gap)
+- [Vendor Assets (Offline)](#vendor-assets-offline)
 - [Deployment](#deployment)
 - [License](#license)
 
@@ -175,11 +175,11 @@ This fork of Quartz includes the following modifications:
 | **Combined Code**         | Merges all code blocks on a page into a single copyable block         |
 | **Dark Mode Only**        | Light mode disabled; both themes use Catppuccin Mocha                 |
 | **Custom OG Images**      | Social preview images matching the site theme                         |
-| **Air-Gapped Assets**     | Google Fonts, KaTeX, and Mermaid vendored locally — zero CDN requests |
+| **Offline Assets**        | Google Fonts, KaTeX, and Mermaid vendored locally — zero CDN requests |
 
 ---
 
-## Vendor Assets (Air-Gap)
+## Vendor Assets (Offline)
 
 All external runtime dependencies are vendored into the repository. The site makes zero CDN requests at both build time and runtime.
 
@@ -201,7 +201,7 @@ The site deploys to GitHub Pages via a GitHub Actions workflow on push to `main`
 push to main → npm ci → quartz build → deploy to GitHub Pages
 ```
 
-### GitLab Pages (Air-Gapped)
+### GitLab Pages (Offline)
 
 Set `baseUrl` in `quartz.config.ts` to your GitLab Pages URL, then use the included `.gitlab-ci.yml`. The CI expects a shell runner with Node.js installed — bring `node_modules` with the project so no internet is needed.
 

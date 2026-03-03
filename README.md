@@ -27,7 +27,7 @@ Notes, projects, tools, and references — organized and published as a searchab
 - [Project Structure](#project-structure)
 - [Content](#content)
 - [Customizations](#customizations)
-- [Vendor Assets (Offline)](#vendor-assets-offline)
+- [Vendor Assets](#vendor-assets)
 - [Deployment](#deployment)
 - [License](#license)
 
@@ -144,7 +144,6 @@ npm run format               # Auto-format with Prettier
 │   └── vendor-assets.sh     # Downloads vendored assets (run once online)
 ├── quartz.config.ts         # Site configuration
 ├── quartz.layout.ts         # Layout configuration
-├── .gitlab-ci.yml           # GitLab Pages CI pipeline
 └── assets/                  # Repository assets (banner, etc.)
 ```
 
@@ -179,7 +178,7 @@ This fork of Quartz includes the following modifications:
 
 ---
 
-## Vendor Assets (Offline)
+## Vendor Assets
 
 All external runtime dependencies are vendored into the repository. The site makes zero CDN requests at both build time and runtime.
 
@@ -191,6 +190,8 @@ bash scripts/vendor-assets.sh
 
 This populates `quartz/static/fonts/`, `quartz/static/katex/`, and `quartz/static/vendor/`. Re-run after upgrading dependencies (e.g., KaTeX via npm).
 
+---
+
 ## Deployment
 
 ### GitHub Pages
@@ -199,14 +200,6 @@ The site deploys to GitHub Pages via a GitHub Actions workflow on push to `main`
 
 ```
 push to main → npm ci → quartz build → deploy to GitHub Pages
-```
-
-### GitLab Pages (Offline)
-
-Set `baseUrl` in `quartz.config.ts` to your GitLab Pages URL, then use the included `.gitlab-ci.yml`. The CI expects a shell runner with Node.js installed — bring `node_modules` with the project so no internet is needed.
-
-```
-push to main → npx quartz build → deploy to GitLab Pages
 ```
 
 ---

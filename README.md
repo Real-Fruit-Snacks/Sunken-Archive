@@ -180,15 +180,7 @@ This fork of Quartz includes the following modifications:
 
 ## Vendor Assets
 
-All external runtime dependencies are vendored into the repository. The site makes zero CDN requests at both build time and runtime.
-
-Run once while online to download/copy all assets:
-
-```bash
-bash scripts/vendor-assets.sh
-```
-
-This populates `quartz/static/fonts/`, `quartz/static/katex/`, and `quartz/static/vendor/`. Re-run after upgrading dependencies (e.g., KaTeX via npm).
+Fonts, KaTeX, and Mermaid are vendored in `quartz/static/` — the site makes zero CDN requests. Re-run `bash scripts/vendor-assets.sh` after upgrading dependencies to refresh them.
 
 ---
 

@@ -144,7 +144,6 @@ npm run format               # Auto-format with Prettier
 │   └── vendor-assets.sh     # Downloads vendored assets (run once online)
 ├── quartz.config.ts         # Site configuration
 ├── quartz.layout.ts         # Layout configuration
-├── Dockerfile               # Multi-stage Docker build
 ├── .gitlab-ci.yml           # GitLab Pages CI pipeline
 └── assets/                  # Repository assets (banner, etc.)
 ```
@@ -204,15 +203,10 @@ push to main → npm ci → quartz build → deploy to GitHub Pages
 
 ### GitLab Pages (Air-Gapped)
 
-Set `baseUrl` in `quartz.config.ts` to your GitLab Pages URL, then use the included `.gitlab-ci.yml`:
+Set `baseUrl` in `quartz.config.ts` to your GitLab Pages URL, then use the included `.gitlab-ci.yml`. The CI expects a shell runner with Node.js installed — bring `node_modules` with the project so no internet is needed.
 
-**Option A** — Runners have npm access: uses the default config (`npm ci` + build).
-
-**Option B** — Fully air-gapped runners: push a pre-built image once while online, then uncomment Option B in `.gitlab-ci.yml`:
-
-```bash
-docker build --target deps -t $CI_REGISTRY/group/quartz-builder:latest .
-docker push $CI_REGISTRY/group/quartz-builder:latest
+```
+push to main → npx quartz build → deploy to GitLab Pages
 ```
 
 ---

@@ -43,3 +43,6 @@ replit.nix
 # Logs
 *.log
 npm-debug.log*
+
+# Archives
+*.tar.gz

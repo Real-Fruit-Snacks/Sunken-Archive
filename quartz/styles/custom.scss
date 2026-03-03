@@ -1,4 +1,5 @@
 @use "./base.scss";
+@use "./fonts.scss";
 
 .variable {
   color: var(--variable-color, #f38ba8);

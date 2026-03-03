@@ -27,6 +27,7 @@ Notes, projects, tools, and references — organized and published as a searchab
 - [Project Structure](#project-structure)
 - [Content](#content)
 - [Customizations](#customizations)
+- [Vendor Assets (Air-Gap)](#vendor-assets-air-gap)
 - [Deployment](#deployment)
 - [License](#license)
 
@@ -135,9 +136,16 @@ npm run format               # Auto-format with Prettier
 │   ├── components/          # UI components (Preact)
 │   ├── plugins/             # Transformers, filters, emitters
 │   ├── static/              # Static assets and tool HTML
+│   │   ├── fonts/           # Vendored Google Fonts (woff2)
+│   │   ├── katex/           # Vendored KaTeX CSS, JS, fonts
+│   │   └── vendor/          # Vendored Mermaid ESM bundle
 │   └── styles/              # SCSS stylesheets
+├── scripts/                 # Build/setup scripts
+│   └── vendor-assets.sh     # Downloads vendored assets (run once online)
 ├── quartz.config.ts         # Site configuration
 ├── quartz.layout.ts         # Layout configuration
+├── Dockerfile               # Multi-stage Docker build
+├── .gitlab-ci.yml           # GitLab Pages CI pipeline
 └── assets/                  # Repository assets (banner, etc.)
 ```
 
@@ -160,18 +168,33 @@ npm run format               # Auto-format with Prettier
 
 This fork of Quartz includes the following modifications:
 
-| Feature                   | Description                                                      |
-| ------------------------- | ---------------------------------------------------------------- |
-| **SVG Favicon**           | Custom anchor favicon generated from SVG via Sharp               |
-| **Robots.txt**            | Emitter plugin for search engine directives and sitemap          |
-| **Variable Highlighting** | Wraps `<Variable>` placeholders in styled spans (prose and code) |
-| **Combined Code**         | Merges all code blocks on a page into a single copyable block    |
-| **Dark Mode Only**        | Light mode disabled; both themes use Catppuccin Mocha            |
-| **Custom OG Images**      | Social preview images matching the site theme                    |
+| Feature                   | Description                                                           |
+| ------------------------- | --------------------------------------------------------------------- |
+| **SVG Favicon**           | Custom anchor favicon generated from SVG via Sharp                    |
+| **Robots.txt**            | Emitter plugin for search engine directives and sitemap               |
+| **Variable Highlighting** | Wraps `<Variable>` placeholders in styled spans (prose and code)      |
+| **Combined Code**         | Merges all code blocks on a page into a single copyable block         |
+| **Dark Mode Only**        | Light mode disabled; both themes use Catppuccin Mocha                 |
+| **Custom OG Images**      | Social preview images matching the site theme                         |
+| **Air-Gapped Assets**     | Google Fonts, KaTeX, and Mermaid vendored locally — zero CDN requests |
 
 ---
 
+## Vendor Assets (Air-Gap)
+
+All external runtime dependencies are vendored into the repository. The site makes zero CDN requests at both build time and runtime.
+
+Run once while online to download/copy all assets:
+
+```bash
+bash scripts/vendor-assets.sh
+```
+
+This populates `quartz/static/fonts/`, `quartz/static/katex/`, and `quartz/static/vendor/`. Re-run after upgrading dependencies (e.g., KaTeX via npm).
+
 ## Deployment
+
+### GitHub Pages
 
 The site deploys to GitHub Pages via a GitHub Actions workflow on push to `main`.
 
@@ -179,7 +202,18 @@ The site deploys to GitHub Pages via a GitHub Actions workflow on push to `main`
 push to main → npm ci → quartz build → deploy to GitHub Pages
 ```
 
-Live at: **https://real-fruit-snacks.github.io/Sunken-Archive**
+### GitLab Pages (Air-Gapped)
+
+Set `baseUrl` in `quartz.config.ts` to your GitLab Pages URL, then use the included `.gitlab-ci.yml`:
+
+**Option A** — Runners have npm access: uses the default config (`npm ci` + build).
+
+**Option B** — Fully air-gapped runners: push a pre-built image once while online, then uncomment Option B in `.gitlab-ci.yml`:
+
+```bash
+docker build --target deps -t $CI_REGISTRY/group/quartz-builder:latest .
+docker push $CI_REGISTRY/group/quartz-builder:latest
+```
 
 ---
 

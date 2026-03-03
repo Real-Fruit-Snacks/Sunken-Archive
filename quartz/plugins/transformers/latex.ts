@@ -1,3 +1,5 @@
+import { readFileSync } from "fs"
+import { join } from "path"
 import remarkMath from "remark-math"
 import rehypeKatex from "rehype-katex"
 import rehypeMathjax from "rehype-mathjax/svg"
@@ -56,20 +58,34 @@ export const Latex: QuartzTransformerPlugin<Partial<Options>> = (opts) => {
         }
       }
     },
-    externalResources() {
+    externalResources(ctx) {
       switch (engine) {
-        case "katex":
+        case "katex": {
+          const baseUrl = ctx.cfg.configuration.baseUrl ?? "localhost"
+          const basePath = new URL(`https://${baseUrl}`).pathname.replace(/\/$/, "")
+          const root = process.cwd()
+
+          // Inline KaTeX CSS with font URLs rewritten to self-hosted paths
+          let katexCss = readFileSync(join(root, "quartz/static/katex/katex.min.css"), "utf-8")
+          katexCss = katexCss.replace(/url\(fonts\//g, `url(${basePath}/static/katex/fonts/`)
+
+          // Inline copy-tex JS
+          const copyTexJs = readFileSync(
+            join(root, "quartz/static/katex/contrib/copy-tex.min.js"),
+            "utf-8",
+          )
+
           return {
-            css: [{ content: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" }],
+            css: [{ content: katexCss, inline: true }],
             js: [
               {
-                // fix copy behaviour: https://github.com/KaTeX/KaTeX/blob/main/contrib/copy-tex/README.md
-                src: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js",
+                script: copyTexJs,
                 loadTime: "afterDOMReady",
-                contentType: "external",
+                contentType: "inline",
               },
             ],
           }
+        }
       }
     },
   }

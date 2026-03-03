@@ -190,9 +190,12 @@ document.addEventListener("nav", async () => {
   const nodes = center.querySelectorAll("code.mermaid") as NodeListOf<HTMLElement>
   if (nodes.length === 0) return
 
+  const slug = document.body.dataset.slug ?? ""
+  const depth = slug.split("/").filter(Boolean).length
+  const toRoot = depth > 0 ? "../".repeat(depth) : "./"
   mermaidImport ||= await import(
     // @ts-ignore
-    "https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs"
+    `${toRoot}static/vendor/mermaid.esm.min.mjs`
   )
   const mermaid = mermaidImport.default
 

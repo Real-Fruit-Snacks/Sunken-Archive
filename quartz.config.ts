@@ -14,11 +14,11 @@ const config: QuartzConfig = {
     enablePopovers: true,
     analytics: null,
     locale: "en-US",
-    baseUrl: "Real-Fruit-Snacks.github.io/Sunken-Archive",
+    baseUrl: "localhost",
     ignorePatterns: ["private", "templates", ".obsidian", "AGENTS.md"],
     defaultDateType: "modified",
     theme: {
-      fontOrigin: "googleFonts",
+      fontOrigin: "local",
       cdnCaching: false,
       typography: {
         header: "Schibsted Grotesk",
